@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.3'
 # Use postgresql as the database for Active Record
-gem 'pg'
+gem 'pg', '~> 0.18.2'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -15,9 +15,9 @@ gem 'coffee-rails', '~> 4.1.0'
 # gem 'therubyracer', platforms: :ruby
 
 # Use jquery as the JavaScript library
-gem 'jquery-rails'
+gem 'jquery-rails', '~> 4.0.4'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
-gem 'turbolinks'
+gem 'turbolinks', '~> 2.5.3'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
@@ -39,7 +39,20 @@ group :development, :test do
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
 
-  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'spring'
+  # Add Spork test server for Rails
+  gem 'spork-rails', '~> 4.0.0'
+
+  # Add Guard for Spork - this monitors configuration files on the filesystem and restarts the Spork server if there is a change
+  gem 'guard-spork', '~> 2.1.0'
+  # Init Guard configuration file
+  # bundle exec guard init spork
+  # Run Guard DRb server
+  # bundle exec guard
+
+  # Other useful gems for testing
+  gem 'factory_girl_rails', '~> 4.0'
+  gem 'rspec-rails', '~> 3.0'
+
+  gem 'rubocop', '~> 0.32.1', require: false
 end
 

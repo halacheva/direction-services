@@ -1,0 +1,28 @@
+# This is the default configuration file. Enabling and disabling is configured
+# in separate files. This file adds all other parameters apart from Enabled.
+
+inherit_from:
+  - config/rubocop/enabled.yml
+  - config/rubocop/disabled.yml
+
+# Common configuration.
+AllCops:
+  # Include gemspec and Rakefile
+  Includes:
+    - '**/*.gemspec'
+    - '**/Rakefile'
+  Excludes:
+    - '**/db/**seeds.rb'
+    - '**/db/**schema.rb'
+    - '**/config/*initializers/**'
+    - '**/script/**'
+  # By default, the rails cops are not run. Override in project or home
+  # directory .rubocop.yml files, or by giving the -R/--rails option.
+  RunRailsCops: true
+
+LineLength:
+  Max: 100
+
+MethodLength:
+  CountComments: false  # count full line comments?
+  Max: 25
