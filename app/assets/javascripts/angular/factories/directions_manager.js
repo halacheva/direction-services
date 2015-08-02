@@ -2,7 +2,7 @@
 
 angular.module('directionServicesApp').factory('DirectionsManager', ['$window', '$http',
   function($window, $http) {
-    var map, geocoder, placesService, directionsService;
+    var map, geocoder, placesService, directionsService, directionsRenderer;
     // Holds all elements for each address: marker, searchBox, input
     var addresses = {
       origin: {},
@@ -13,6 +13,7 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
       geocoder = new google.maps.Geocoder();
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer({ map: map, draggable: true });
 
       addresses.origin = {
         input: originInput,
