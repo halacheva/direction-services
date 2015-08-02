@@ -2,16 +2,17 @@
 
 angular.module('directionServicesApp').factory('DirectionsManager', ['$window', '$http',
   function($window, $http) {
-    var map, geocoder, placesService;
+    var map, geocoder, placesService, directionsService;
     // Holds all elements for each address: marker, searchBox, input
     var addresses = {
       origin: {},
       destination: {}
     };
 
-    function loadSearchServices(originInput, destinationInput) {
+    function loadServices(originInput, destinationInput) {
       geocoder = new google.maps.Geocoder();
       placesService = new google.maps.places.PlacesService(map);
+      directionsService = new google.maps.DirectionsService();
 
       addresses.origin = {
         input: originInput,
@@ -127,6 +128,22 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
       }
     }
 
+    function findRoutes() {
+      var request = {
+        origin: addresses.origin.marker.position,
+        destination: addresses.destination.marker.position,
+        travelMode: google.maps.TravelMode.DRIVING,
+        provideRouteAlternatives: true
+      };
+      directionsService.route(request, function(result, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+          addresses.origin.marker.setMap(null);
+          addresses.destination.marker.setMap(null);
+          directionsRenderer.setDirections(result);
+        }
+      });
+    }
+
     return {
       init: function(mapElement, originInput, destinationInput) {
         map = new google.maps.Map(mapElement[0], {
@@ -135,11 +152,15 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
           center: { lat: 42.6954322, lng: 23.3239467 } // Sofia coordinates
         });
 
-        loadSearchServices(originInput, destinationInput);
+        loadServices(originInput, destinationInput);
       },
 
       reset: function(type) {
         resetAddress(type);
+      },
+
+      find: function() {
+        findRoutes();
       }
     };
   }]

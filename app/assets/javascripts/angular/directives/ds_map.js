@@ -19,6 +19,10 @@ angular.module('directionServicesApp').directive('dsMap', ['DirectionsManager',
           DirectionsManager.reset('destination');
         }
       });
+
+      element.find('button').on('click', function() {
+        DirectionsManager.find();
+      });
     }
   }
 }]);
