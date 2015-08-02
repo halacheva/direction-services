@@ -7,6 +7,7 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
 
       init: function(map) {
         this.map = new google.maps.Map(map[0], {
+          draggableCursor: 'crosshair',
           zoom: 10,
           center: { lat: 42.6954322, lng: 23.3239467 } // Sofia coordinates
         });
@@ -89,6 +90,8 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
           this.markers[type].setMap(null);
           this.markers[type] = undefined;
         }
+
+        this.toggleMapCursor();
       },
 
       selectSearchBox: function(type) {
@@ -112,6 +115,16 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
           if (typeof input !== 'undefined') {
             input.val(places[0].formatted_address);
           }
+
+          this.toggleMapCursor();
+        }
+      },
+
+      toggleMapCursor: function() {
+        if (typeof this.markers.from !== 'undefined' && typeof this.markers.to !== 'undefined') {
+          this.map.draggableCursor = undefined;
+        } else {
+          this.map.draggableCursor = 'crosshair';
         }
       }
     };
