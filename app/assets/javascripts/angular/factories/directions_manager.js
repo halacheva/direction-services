@@ -5,30 +5,30 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
     var map, geocoder, placesService;
     // Holds all elements for each address: marker, searchBox, input
     var addresses = {
-      from: {},
-      to: {}
+      origin: {},
+      destination: {}
     };
 
-    function loadSearchServices(fromInput, toInput) {
+    function loadSearchServices(originInput, destinationInput) {
       geocoder = new google.maps.Geocoder();
       placesService = new google.maps.places.PlacesService(map);
 
-      addresses.from = {
-        input: fromInput,
-        searchBox: new google.maps.places.SearchBox(fromInput[0])
+      addresses.origin = {
+        input: originInput,
+        searchBox: new google.maps.places.SearchBox(originInput[0])
       };
 
-      google.maps.event.addListener(addresses.from.searchBox, 'places_changed', function() {
-        addressSearch('from');
+      google.maps.event.addListener(addresses.origin.searchBox, 'places_changed', function() {
+        addressSearch('origin');
       });
 
-      addresses.to = {
-        input: toInput,
-        searchBox: new google.maps.places.SearchBox(toInput[0])
+      addresses.destination = {
+        input: destinationInput,
+        searchBox: new google.maps.places.SearchBox(destinationInput[0])
       };
 
-      google.maps.event.addListener(addresses.to.searchBox, 'places_changed', function() {
-        addressSearch('to');
+      google.maps.event.addListener(addresses.destination.searchBox, 'places_changed', function() {
+        addressSearch('destination');
       });
 
       google.maps.event.addListener(map, 'click', function(event) {
@@ -59,10 +59,10 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
     function selectAddressType(type) {
       if (typeof addresses[type] !== 'undefined') {
         return type;
-      } if (typeof addresses.from.marker === 'undefined') {
-        return 'from';
-      } else if (typeof addresses.to.marker === 'undefined') {
-        return 'to';
+      } if (typeof addresses.origin.marker === 'undefined') {
+        return 'origin';
+      } else if (typeof addresses.destination.marker === 'undefined') {
+        return 'destination';
       }
     }
 
@@ -99,12 +99,12 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
 
     function updateViewPort() {
       var bounds = new google.maps.LatLngBounds();
-      if (typeof addresses.from.marker !== 'undefined') {
-        bounds.extend(addresses.from.marker.position);
+      if (typeof addresses.origin.marker !== 'undefined') {
+        bounds.extend(addresses.origin.marker.position);
       }
 
-      if (typeof addresses.to.marker !== 'undefined') {
-        bounds.extend(addresses.to.marker.position);
+      if (typeof addresses.destination.marker !== 'undefined') {
+        bounds.extend(addresses.destination.marker.position);
       }
 
       map.fitBounds(bounds);
@@ -120,7 +120,7 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
     }
 
     function toggleMapCursor() {
-      if (typeof addresses.from.marker !== 'undefined' && typeof addresses.to.marker !== 'undefined') {
+      if (typeof addresses.origin.marker !== 'undefined' && typeof addresses.destination.marker !== 'undefined') {
         map.draggableCursor = undefined;
       } else {
         map.draggableCursor = 'crosshair';
@@ -128,14 +128,14 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
     }
 
     return {
-      init: function(mapElement, fromInput, toInput) {
+      init: function(mapElement, originInput, destinationInput) {
         map = new google.maps.Map(mapElement[0], {
           draggableCursor: 'crosshair',
           zoom: 10,
           center: { lat: 42.6954322, lng: 23.3239467 } // Sofia coordinates
         });
 
-        loadSearchServices(fromInput, toInput);
+        loadSearchServices(originInput, destinationInput);
       },
 
       reset: function(type) {

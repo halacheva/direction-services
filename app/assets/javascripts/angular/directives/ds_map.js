@@ -3,20 +3,20 @@ angular.module('directionServicesApp').directive('dsMap', ['DirectionsManager',
   return {
     templateUrl: 'assets/angular/templates/ds_map.html',
     link: function(scope, element, attrs) {
-      var fromAddress = element.find('#from_address');
-      var toAddress = element.find('#to_address');
+      var originAddress = element.find('#origin_address');
+      var destinationAddress = element.find('#destination_address');
 
-      DirectionsManager.init(element.find('#map'), fromAddress, toAddress);
+      DirectionsManager.init(element.find('#map'), originAddress, destinationAddress);
 
-      fromAddress.on('blur', function() {
+      originAddress.on('blur', function() {
         if (this.value === '') {
-          DirectionsManager.reset('from');
+          DirectionsManager.reset('origin');
         }
       });
 
-      toAddress.on('blur', function() {
+      destinationAddress.on('blur', function() {
         if (this.value === '') {
-          DirectionsManager.reset('to');
+          DirectionsManager.reset('destination');
         }
       });
     }
