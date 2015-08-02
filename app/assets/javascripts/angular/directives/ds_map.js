@@ -1,11 +1,26 @@
-angular.module('directionServicesApp').directive('dsMap', function() {
+angular.module('directionServicesApp').directive('dsMap', ['DirectionsManager',
+  function(DirectionsManager) {
   return {
     templateUrl: 'assets/angular/templates/ds_map.html',
     link: function(scope, element, attrs) {
-      var map = new google.maps.Map(element.find('#map').get(0), {
-        zoom: 8,
-        center: { lat: -34.397, lng: 150.644 }
+      var fromAddress = element.find('#from_address');
+      var toAddress = element.find('#to_address');
+
+      DirectionsManager.init(element.find('#map'));
+      DirectionsManager.loadSearchServices(fromAddress, toAddress);
+
+      fromAddress.on('blur', function() {
+        if (this.value === '') {
+          DirectionsManager.removeMarker('from');
+        }
+      });
+
+      toAddress.on('blur', function() {
+        if (this.value === '') {
+          DirectionsManager.removeMarker('to');
+        }
       });
     }
   }
-});
+}]);
+
