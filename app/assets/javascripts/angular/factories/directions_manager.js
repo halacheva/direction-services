@@ -2,130 +2,144 @@
 
 angular.module('directionServicesApp').factory('DirectionsManager', ['$window', '$http',
   function($window, $http) {
-    return {
-      markers: {},
+    var map, geocoder, placesService;
+    // Holds all elements for each address: marker, searchBox, input
+    var addresses = {
+      from: {},
+      to: {}
+    };
 
-      init: function(map) {
-        this.map = new google.maps.Map(map[0], {
+    function loadSearchServices(fromInput, toInput) {
+      geocoder = new google.maps.Geocoder();
+      placesService = new google.maps.places.PlacesService(map);
+
+      addresses.from = {
+        input: fromInput,
+        searchBox: new google.maps.places.SearchBox(fromInput[0])
+      };
+
+      google.maps.event.addListener(addresses.from.searchBox, 'places_changed', function() {
+        addressSearch('from');
+      });
+
+      addresses.to = {
+        input: toInput,
+        searchBox: new google.maps.places.SearchBox(toInput[0])
+      };
+
+      google.maps.event.addListener(addresses.to.searchBox, 'places_changed', function() {
+        addressSearch('to');
+      });
+
+      google.maps.event.addListener(map, 'click', function(event) {
+        locationSearch(event.latLng);
+      });
+    }
+
+
+    function addressSearch(type) {
+      var address = addresses[type].input.val();
+
+      placesService.textSearch({ query: address }, function(places, status) {
+        onPlacesFound(type, places);
+        updateViewPort();
+      });
+    }
+
+    function locationSearch(location, type) {
+      var type = selectAddressType(type);
+
+      if (typeof type !== 'undefined') {
+        geocoder.geocode({ location: location }, function(places, status) {
+          onPlacesFound(type, places, true);
+        });
+      }
+    }
+
+    function selectAddressType(type) {
+      if (typeof addresses[type] !== 'undefined') {
+        return type;
+      } if (typeof addresses.from.marker === 'undefined') {
+        return 'from';
+      } else if (typeof addresses.to.marker === 'undefined') {
+        return 'to';
+      }
+    }
+
+    function onPlacesFound(type, places, updateInputValue) {
+      resetAddress(type);
+
+      if (places.length > 0) {
+        positionMarker(type, places[0]);
+
+        if (updateInputValue) {
+          addresses[type].input.val(places[0].formatted_address);
+        }
+
+        toggleMapCursor();
+      }
+    }
+
+    function positionMarker(type, place) {
+      var location = place.geometry.location;
+      var title = place.formatted_address;
+
+      addresses[type].marker = new google.maps.Marker({
+        position: location,
+        title: title,
+        map: map,
+        draggable: true,
+        type: type
+      });
+
+      google.maps.event.addListener(addresses[type].marker, 'dragend', function(event) {
+        locationSearch(event.latLng, type);
+      });
+    }
+
+    function updateViewPort() {
+      var bounds = new google.maps.LatLngBounds();
+      if (typeof addresses.from.marker !== 'undefined') {
+        bounds.extend(addresses.from.marker.position);
+      }
+
+      if (typeof addresses.to.marker !== 'undefined') {
+        bounds.extend(addresses.to.marker.position);
+      }
+
+      map.fitBounds(bounds);
+    }
+
+    function resetAddress(type) {
+      if (typeof addresses[type].marker !== 'undefined') {
+        addresses[type].marker.setMap(null);
+        addresses[type].marker = undefined;
+      }
+
+      toggleMapCursor();
+    }
+
+    function toggleMapCursor() {
+      if (typeof addresses.from.marker !== 'undefined' && typeof addresses.to.marker !== 'undefined') {
+        map.draggableCursor = undefined;
+      } else {
+        map.draggableCursor = 'crosshair';
+      }
+    }
+
+    return {
+      init: function(mapElement, fromInput, toInput) {
+        map = new google.maps.Map(mapElement[0], {
           draggableCursor: 'crosshair',
           zoom: 10,
           center: { lat: 42.6954322, lng: 23.3239467 } // Sofia coordinates
         });
+
+        loadSearchServices(fromInput, toInput);
       },
 
-      loadSearchServices: function(fromInput, toInput) {
-        var that = this;
-        this.geocoder = new google.maps.Geocoder();
-        this.placesService = new google.maps.places.PlacesService(this.map);
-
-        this.fromInput = fromInput;
-        this.fromSearchBox = new google.maps.places.SearchBox(fromInput[0]);
-        google.maps.event.addListener(this.fromSearchBox, 'places_changed', function() {
-          that.addressSearch('from', that.fromInput);
-        });
-
-        this.toInput = toInput;
-        this.toSearchBox = new google.maps.places.SearchBox(toInput[0]);
-        google.maps.event.addListener(this.toSearchBox, 'places_changed', function() {
-          that.addressSearch('to', that.toInput);
-        });
-
-        google.maps.event.addListener(this.map, 'click', function(event) {
-          that.locationSearch(event.latLng);
-        });
-      },
-
-      addressSearch: function(type, input) {
-        var that = this;
-        this.placesService.textSearch({ query: input.val() }, function(places, status) {
-          that.onPlacesFound(type, places);
-          that.updateViewPort();
-        });
-      },
-
-      locationSearch: function(location, type) {
-        var that = this;
-        var searchBox = this.selectSearchBox(type);
-
-        if (typeof searchBox !== 'undefined') {
-          this.geocoder.geocode({ location: location }, function(places, status) {
-            that.onPlacesFound(searchBox.type, places, searchBox.input);
-          });
-        }
-      },
-
-      positionMarker: function(type, place) {
-        var that = this;
-        var location = place.geometry.location;
-        var title = place.formatted_address;
-
-        this.markers[type] = new google.maps.Marker({
-          position: location,
-          title: title,
-          map: this.map,
-          draggable: true,
-          type: type
-        });
-
-        google.maps.event.addListener(this.markers[type], 'dragend', function(event) {
-          that.locationSearch(event.latLng, this.type);
-        });
-      },
-
-      updateViewPort: function() {
-        var bounds = new google.maps.LatLngBounds();
-        if (typeof this.markers.from !== 'undefined') {
-          bounds.extend(this.markers.from.position);
-        }
-
-        if (typeof this.markers.to !== 'undefined') {
-          bounds.extend(this.markers.to.position);
-        }
-
-        this.map.fitBounds(bounds);
-      },
-
-      removeMarker: function(type) {
-        if (typeof this.markers[type] !== 'undefined') {
-          this.markers[type].setMap(null);
-          this.markers[type] = undefined;
-        }
-
-        this.toggleMapCursor();
-      },
-
-      selectSearchBox: function(type) {
-        if (typeof type !== 'undefined') {
-          return { type: type,
-                   input: this[type + 'Input'] };
-        } if (typeof this.markers.from === 'undefined') {
-          return { type: 'from',
-                   input: this.fromInput };
-        } else if (typeof this.markers.to === 'undefined') {
-          return { type: 'to',
-                   input: this.toInput };
-        }
-      },
-
-      onPlacesFound: function(type, places, input) {
-        this.removeMarker(type);
-
-        if (places.length > 0) {
-          this.positionMarker(type, places[0]);
-          if (typeof input !== 'undefined') {
-            input.val(places[0].formatted_address);
-          }
-
-          this.toggleMapCursor();
-        }
-      },
-
-      toggleMapCursor: function() {
-        if (typeof this.markers.from !== 'undefined' && typeof this.markers.to !== 'undefined') {
-          this.map.draggableCursor = undefined;
-        } else {
-          this.map.draggableCursor = 'crosshair';
-        }
+      reset: function(type) {
+        resetAddress(type);
       }
     };
   }]

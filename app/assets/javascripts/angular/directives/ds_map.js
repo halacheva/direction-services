@@ -6,18 +6,17 @@ angular.module('directionServicesApp').directive('dsMap', ['DirectionsManager',
       var fromAddress = element.find('#from_address');
       var toAddress = element.find('#to_address');
 
-      DirectionsManager.init(element.find('#map'));
-      DirectionsManager.loadSearchServices(fromAddress, toAddress);
+      DirectionsManager.init(element.find('#map'), fromAddress, toAddress);
 
       fromAddress.on('blur', function() {
         if (this.value === '') {
-          DirectionsManager.removeMarker('from');
+          DirectionsManager.reset('from');
         }
       });
 
       toAddress.on('blur', function() {
         if (this.value === '') {
-          DirectionsManager.removeMarker('to');
+          DirectionsManager.reset('to');
         }
       });
     }
