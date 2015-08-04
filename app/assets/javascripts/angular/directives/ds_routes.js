@@ -8,26 +8,34 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
         Router.init(element.find('#map'), originAddress, destinationAddress);
       },
-      controller: function($scope, Router) {
-        $scope.origin = '';
-        $scope.destination = '';
+      controller: ['$scope', 'Router',
+        function($scope, Router) {
+          $scope.origin = '';
+          $scope.destination = '';
 
-        $scope.resetOrigin = function() {
-          if ($scope.origin === '') {
-            Router.reset('origin');
+          $scope.resetOrigin = function() {
+            if ($scope.origin === '') {
+              Router.reset('origin');
+            }
+          };
+
+          $scope.resetDestination = function() {
+            if ($scope.destination === '') {
+              Router.reset('destination');
+            }
+          };
+
+          $scope.findRoutes = function() {
+            Router.route();
+          };
+
+          $scope.clear = function() {
+            $scope.origin = '';
+            $scope.destination = '';
+            Router.clear();
           }
-        };
-
-        $scope.resetDestination = function() {
-          if ($scope.destination === '') {
-            Router.reset('destination');
-          }
-        };
-
-        $scope.findRoutes = function() {
-          Router.route();
-        };
-      }
+        }
+      ]
     };
   }
 ]);

@@ -145,6 +145,12 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http',
       });
     }
 
+    function clear() {
+      resetAddress('origin');
+      resetAddress('destination');
+      directionsRenderer.setMap(null);
+    }
+
     return {
       init: function(mapElement, originInput, destinationInput) {
         map = new google.maps.Map(mapElement[0], {
@@ -162,6 +168,10 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http',
 
       route: function() {
         findRoutes();
+      },
+
+      clear: function() {
+        clear();
       }
     };
   }]

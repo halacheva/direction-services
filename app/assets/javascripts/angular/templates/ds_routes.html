@@ -1,16 +1,7 @@
 <div class="input-group">
-  <input type="text"
-         ng-model="origin"
-         placeholder="From..."
-         id="origin_address"
-         ng-blur="resetOrigin()"
-         class="form-control"/>
-  <input type="text"
-         ng-model="destination"
-         placeholder="To..."
-         id="destination_address"
-         ng-blur="resetDestination()"
-         class="form-control"/>
+  <input type="text" ng-model="origin" placeholder="From..." id="origin_address" ng-blur="resetOrigin()" class="form-control"/>
+  <input type="text" ng-model="destination" placeholder="To..." id="destination_address" ng-blur="resetDestination()" class="form-control"/>
   <button type="button" class="btn btn-default" ng-click="findRoutes()">Find Routes</button>
+  <button type="button" class="btn btn-default" ng-click="clear()">Clear</button>
 </div>
 <div id="map"></div>
