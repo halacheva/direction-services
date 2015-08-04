@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('directionServicesApp').factory('DirectionsManager', ['$window', '$http',
+angular.module('directionServicesApp').factory('Router', ['$window', '$http',
   function($window, $http) {
     var map, geocoder, placesService, directionsService, directionsRenderer;
     // Holds all elements for each address: marker, searchBox, input
@@ -160,7 +160,7 @@ angular.module('directionServicesApp').factory('DirectionsManager', ['$window', 
         resetAddress(type);
       },
 
-      find: function() {
+      route: function() {
         findRoutes();
       }
     };
