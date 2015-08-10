@@ -4,4 +4,14 @@
   <button type="button" class="btn btn-default" ng-click="findRoutes()">Find Routes</button>
   <button type="button" class="btn btn-default" ng-click="clear()">Clear</button>
 </div>
+<div>
+  Total results: {{ routes.length }}
+  <div ng-repeat="route in routes track by $index">
+    Number: {{ $index + 1 }}
+    Summary: {{ route.summary }}
+    Distance: {{ route.legs[0].distance.text }}
+    Duration: {{ route.legs[0].duration.text }}
+    <button type="button" class="btn btn-default" ng-click="displayRoute($index)" ng-hide='displayedRoute == $index'>Display</button>
+  </div>
+</div>
 <div id="map"></div>

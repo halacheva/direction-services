@@ -1,14 +1,65 @@
 'use strict';
 
-angular.module('directionServicesApp').factory('Router', ['$window', '$http',
-  function($window, $http) {
+angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$q',
+  function($window, $http, $q) {
     var map, geocoder, placesService, directionsService, directionsRenderer;
     // Holds all elements for each address: marker, searchBox, input
     var addresses = {
       origin: {},
       destination: {}
     };
+    var routes;
 
+    return {
+      init: function(mapElement, originInput, destinationInput) {
+        map = new google.maps.Map(mapElement[0], {
+          draggableCursor: 'crosshair',
+          zoom: 10,
+          center: { lat: 42.6954322, lng: 23.3239467 } // Sofia coordinates
+        });
+
+        loadServices(originInput, destinationInput);
+      },
+
+      clear: function() {
+        resetAddress('origin');
+        resetAddress('destination');
+        directionsRenderer.setMap(null);
+      },
+
+      display: function(index) {
+        directionsRenderer.setRouteIndex(index);
+      },
+
+      reset: function(type) {
+        resetAddress(type);
+      },
+
+      route: function() {
+        var deferred = $q.defer();
+        var request = {
+          origin: addresses.origin.marker.position,
+          destination: addresses.destination.marker.position,
+          travelMode: google.maps.TravelMode.DRIVING,
+          provideRouteAlternatives: true
+        };
+
+        directionsService.route(request, function(result, status) {
+          if (status == google.maps.DirectionsStatus.OK) {
+            addresses.origin.marker.setMap(null);
+            addresses.destination.marker.setMap(null);
+            routes = result;
+            deferred.resolve(result);
+            debugger;
+            directionsRenderer.setDirections(result);
+          }
+        });
+
+        return deferred.promise;
+      },
+    };
+
+    // Private methods
     function loadServices(originInput, destinationInput) {
       geocoder = new google.maps.Geocoder();
       placesService = new google.maps.places.PlacesService(map);
@@ -128,51 +179,5 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http',
         map.draggableCursor = 'crosshair';
       }
     }
-
-    function findRoutes() {
-      var request = {
-        origin: addresses.origin.marker.position,
-        destination: addresses.destination.marker.position,
-        travelMode: google.maps.TravelMode.DRIVING,
-        provideRouteAlternatives: true
-      };
-      directionsService.route(request, function(result, status) {
-        if (status == google.maps.DirectionsStatus.OK) {
-          addresses.origin.marker.setMap(null);
-          addresses.destination.marker.setMap(null);
-          directionsRenderer.setDirections(result);
-        }
-      });
-    }
-
-    function clear() {
-      resetAddress('origin');
-      resetAddress('destination');
-      directionsRenderer.setMap(null);
-    }
-
-    return {
-      init: function(mapElement, originInput, destinationInput) {
-        map = new google.maps.Map(mapElement[0], {
-          draggableCursor: 'crosshair',
-          zoom: 10,
-          center: { lat: 42.6954322, lng: 23.3239467 } // Sofia coordinates
-        });
-
-        loadServices(originInput, destinationInput);
-      },
-
-      reset: function(type) {
-        resetAddress(type);
-      },
-
-      route: function() {
-        findRoutes();
-      },
-
-      clear: function() {
-        clear();
-      }
-    };
   }]
 );
