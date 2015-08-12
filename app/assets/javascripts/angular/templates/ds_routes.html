@@ -1,7 +1,4 @@
 <div class="input-group">
-  <input type="text" ng-model="origin" placeholder="From..." id="origin_address" ng-blur="resetOrigin()" class="form-control"/>
-  <input type="text" ng-model="destination" placeholder="To..." id="destination_address" ng-blur="resetDestination()" class="form-control"/>
-
   <select ng-model="options.travelMode">
     <option value="DRIVING">Driving</option>
     <option value="WALKING">Walking</option>
@@ -9,23 +6,43 @@
     <option value="BICYCLING">Bicycling</option>
   </select>
 
-  <label>Estimate duration in traffic<input type="checkbox" ng-model="options.durationInTraffic"></label>
 
-  <label>Optimize Waypoints<input type="checkbox" ng-model="options.optimizeWaypoints"></label>
+  <input type="text" ng-model="origin" placeholder="From..." id="origin_address" ng-blur="resetOrigin()" class="form-control"/>
 
-  <label>Avoid Highways<input type="checkbox" ng-model="options.avoidHighways"></label>
-
-  <label>Avoid Tolls<input type="checkbox" ng-model="options.avoidTolls"></label>
-
-  <br/>
-
-  <input type="text" placeholder="Via..." id="waypoints" class="form-control"/>
-  <button ng-click='addWaypoint()'>Add to waypoints</button>
-  <div ng-repeat="waypoint in options.waypoints track by $index">
-    <span>{{ waypoint.location }}</span>
-    <label>Stop Over<input type="checkbox" ng-model="waypoint.stopover"></label>
-    <button ng-click="removeWaypoint($index)">Remove</button>
+  <div ng-hide="options.travelMode == 'TRANSIT'">
+    <input type="text" placeholder="Via..." id="waypoints"/>
+    <label>Optimize Waypoints<input type="checkbox" ng-model="options.optimizeWaypoints"></label>
+    <button ng-click='addWaypoint()'>Add to waypoints</button>
+    <div ng-repeat="waypoint in options.waypoints track by $index">
+      <span>{{ waypoint.location }}</span>
+      <label>Stop Over<input type="checkbox" ng-model="waypoint.stopover"></label>
+      <button ng-click="removeWaypoint($index)">Remove</button>
+    </div>
   </div>
+  <input type="text" ng-model="destination" placeholder="To..." id="destination_address" ng-blur="resetDestination()" class="form-control"/>
+
+  <div ng-show="options.travelMode == 'TRANSIT'">
+    <div ng-hide='options.transitOptions.arrivalTime'>
+      Departure Time: <input ng-model="departure.date" ng-change="setDateTime('departure')" type="date"/>
+                      <input ng-model="departure.time" ng-change="setDateTime('departure')" type="time"/>
+    </div>
+    <div ng-hide='options.transitOptions.departureTime'>
+      Arrival Time: <input ng-model="arrival.date" ng-change="setDateTime('arrival')" type="date"/>
+                    <input ng-model="arrival.time" ng-change="setDateTime('arrival')" type="time"/>
+    </div>
+    <div>
+      Transit Modes:
+      <label>BUS<input type="checkbox" ng-click="toggleTravelMode('BUS')"/></label>
+      <label>RAIL<input type="checkbox" ng-click="toggleTravelMode('RAIL')"/></label>
+      <label>SUBWAY<input type="checkbox" ng-click="toggleTravelMode('SUBWAY')"/></label>
+      <label>TRAIN<input type="checkbox" ng-click="toggleTravelMode('TRAIN')"/></label>
+      <label>TRAM<input type="checkbox" ng-click="toggleTravelMode('TRAM')"/></label>
+    </div>
+  </div>
+
+  <label>Estimate duration in traffic<input type="checkbox" ng-model="options.durationInTraffic"></label>
+  <label ng-hide="options.travelMode == 'TRANSIT'">Avoid Highways<input type="checkbox" ng-model="options.avoidHighways"></label>
+  <label ng-hide="options.travelMode == 'TRANSIT'">Avoid Tolls<input type="checkbox" ng-model="options.avoidTolls"></label>
 
   <br/>
 

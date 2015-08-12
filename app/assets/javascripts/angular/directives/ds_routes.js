@@ -15,13 +15,26 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
         function($scope, Router) {
           $scope.origin = '';
           $scope.destination = '';
+          $scope.arrival = {
+            date: undefined,
+            time: undefined
+          };
+          $scope.departure = {
+            date: undefined,
+            time: undefined
+          };
           $scope.options = {
             travelMode: 'DRIVING',
             durationInTraffic: true,
             waypoints: [],
             optimizeWaypoints: false,
             avoidHighways: false,
-            avoidTolls: false
+            avoidTolls: false,
+            transitOptions: {
+              arrivalTime: undefined,
+              departureTime: undefined,
+              modes: []
+            }
           };
 
           $scope.addWaypoint = function() {
@@ -31,6 +44,29 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
           $scope.removeWaypoint = function(index) {
             $scope.options.waypoints.splice(index, 1);
+          };
+
+          $scope.toggleTravelMode = function(mode) {
+            var index = $scope.options.transitOptions.modes.indexOf(mode);
+            if (index >= 0) {
+              $scope.options.transitOptions.modes.splice(index, 1);
+            } else {
+              $scope.options.transitOptions.modes.push(mode);
+            }
+          };
+
+          $scope.setDateTime = function(type) {
+            if ($scope[type].date && $scope[type].time) {
+              var year = $scope[type].date.getFullYear();
+              var month = $scope[type].date.getMonth();
+              var day = $scope[type].date.getDate();
+              var hours = $scope[type].time.getHours();
+              var minutes = $scope[type].time.getMinutes();
+
+              $scope.options.transitOptions[type + 'Time'] =  new Date(year, month, day, hours, minutes);
+            } else {
+              $scope.options.transitOptions[type + 'Time'] = undefined;
+            }
           };
 
           $scope.findRoutes = function() {

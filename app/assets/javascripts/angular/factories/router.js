@@ -44,7 +44,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
             addresses.origin.marker.setMap(null);
             addresses.destination.marker.setMap(null);
             routes = result;
-            debugger;
             deferred.resolve(result);
             directionsRenderer.setDirections(result);
           }
