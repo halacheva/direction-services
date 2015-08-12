@@ -2,23 +2,24 @@
 
 angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$q',
   function($window, $http, $q) {
-    var map, geocoder, placesService, directionsService, directionsRenderer;
+    var map, geocoder, directionsService, directionsRenderer;
     // Holds all elements for each address: marker, searchBox, input
     var addresses = {
       origin: {},
-      destination: {}
+      destination: {},
+      waypoints: {}
     };
     var routes;
 
     return {
-      init: function(mapElement, originInput, destinationInput) {
+      init: function(mapElement, originInput, destinationInput, waypointsInput) {
         map = new google.maps.Map(mapElement[0], {
           draggableCursor: 'crosshair',
           zoom: 10,
           center: { lat: 42.6954322, lng: 23.3239467 } // Sofia coordinates
         });
 
-        loadServices(originInput, destinationInput);
+        loadServices(originInput, destinationInput, waypointsInput);
       },
 
       clear: function() {
@@ -35,22 +36,16 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         resetAddress(type);
       },
 
-      route: function() {
+      route: function(options) {
         var deferred = $q.defer();
-        var request = {
-          origin: addresses.origin.marker.position,
-          destination: addresses.destination.marker.position,
-          travelMode: google.maps.TravelMode.DRIVING,
-          provideRouteAlternatives: true
-        };
 
-        directionsService.route(request, function(result, status) {
+        directionsService.route(mergeRouteOptions(options), function(result, status) {
           if (status == google.maps.DirectionsStatus.OK) {
             addresses.origin.marker.setMap(null);
             addresses.destination.marker.setMap(null);
             routes = result;
-            deferred.resolve(result);
             debugger;
+            deferred.resolve(result);
             directionsRenderer.setDirections(result);
           }
         });
@@ -60,12 +55,13 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
     };
 
     // Private methods
-    function loadServices(originInput, destinationInput) {
+
+    function loadServices(originInput, destinationInput, waypointsInput) {
       geocoder = new google.maps.Geocoder();
-      placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer({ map: map, draggable: true });
 
+      // Origin
       addresses.origin = {
         input: originInput,
         searchBox: new google.maps.places.SearchBox(originInput[0])
@@ -75,6 +71,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         addressSearch('origin');
       });
 
+      // Destination
       addresses.destination = {
         input: destinationInput,
         searchBox: new google.maps.places.SearchBox(destinationInput[0])
@@ -84,19 +81,22 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         addressSearch('destination');
       });
 
+      // Waypoints
+      addresses.waypoints = {
+        input: waypointsInput,
+        searchBox: new google.maps.places.SearchBox(waypointsInput[0])
+      };
+
+      // Google Maps Click
       google.maps.event.addListener(map, 'click', function(event) {
         locationSearch(event.latLng);
       });
     }
 
-
     function addressSearch(type) {
-      var address = addresses[type].input.val();
-
-      placesService.textSearch({ query: address }, function(places, status) {
-        onPlacesFound(type, places);
-        updateViewPort();
-      });
+      var places = addresses[type].searchBox.getPlaces();
+      onPlacesFound(type, places);
+      updateViewPort();
     }
 
     function locationSearch(location, type) {
@@ -179,5 +179,22 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         map.draggableCursor = 'crosshair';
       }
     }
+
+    function mergeRouteOptions(options) {
+      var defaultOptions = {
+        origin: addresses.origin.marker.position,
+        destination: addresses.destination.marker.position,
+        travelMode: google.maps.TravelMode.DRIVING,
+        provideRouteAlternatives: true
+      };
+
+      var mergedOptions = defaultOptions;
+
+      for (var key in options) {
+        mergedOptions[key] = options[key];
+      };
+
+      return mergedOptions;
+    };
   }]
 );

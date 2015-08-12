@@ -1,6 +1,34 @@
 <div class="input-group">
   <input type="text" ng-model="origin" placeholder="From..." id="origin_address" ng-blur="resetOrigin()" class="form-control"/>
   <input type="text" ng-model="destination" placeholder="To..." id="destination_address" ng-blur="resetDestination()" class="form-control"/>
+
+  <select ng-model="options.travelMode">
+    <option value="DRIVING">Driving</option>
+    <option value="WALKING">Walking</option>
+    <option value="TRANSIT">Transit (experimental)</option>
+    <option value="BICYCLING">Bicycling</option>
+  </select>
+
+  <label>Estimate duration in traffic<input type="checkbox" ng-model="options.durationInTraffic"></label>
+
+  <label>Optimize Waypoints<input type="checkbox" ng-model="options.optimizeWaypoints"></label>
+
+  <label>Avoid Highways<input type="checkbox" ng-model="options.avoidHighways"></label>
+
+  <label>Avoid Tolls<input type="checkbox" ng-model="options.avoidTolls"></label>
+
+  <br/>
+
+  <input type="text" placeholder="Via..." id="waypoints" class="form-control"/>
+  <button ng-click='addWaypoint()'>Add to waypoints</button>
+  <div ng-repeat="waypoint in options.waypoints track by $index">
+    <span>{{ waypoint.location }}</span>
+    <label>Stop Over<input type="checkbox" ng-model="waypoint.stopover"></label>
+    <button ng-click="removeWaypoint($index)">Remove</button>
+  </div>
+
+  <br/>
+
   <button type="button" class="btn btn-default" ng-click="findRoutes()">Find Routes</button>
   <button type="button" class="btn btn-default" ng-click="clear()">Clear</button>
 </div>
@@ -9,8 +37,8 @@
   <div ng-repeat="route in routes track by $index">
     Number: {{ $index + 1 }}
     Summary: {{ route.summary }}
-    Distance: {{ route.legs[0].distance.text }}
-    Duration: {{ route.legs[0].duration.text }}
+    Distance: {{ calculateTotalDistance(route.legs) }}
+    Duration: {{ calculateTotalDuration(route.legs) }}
     <button type="button" class="btn btn-default" ng-click="displayRoute($index)" ng-hide='displayedRoute == $index'>Display</button>
   </div>
 </div>
