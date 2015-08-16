@@ -2,10 +2,18 @@
 }
 
 .map-filters {
-  width: 200px;
+  width: 300px;
   float: right;
 }
 
 
 #map {
+}
+
+#waypoints_container {
+  input[type='text'] {
+    float: left;
+    margin-right: 5px;
+    width: 243px;
+  }
 }
