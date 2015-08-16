@@ -7,12 +7,14 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
         $scope.originInput = element.find('#origin_address');
         $scope.destinationInput = element.find('#destination_address');
         $scope.waypointsInput = element.find('#waypoints');
+        $scope.mapContainer = element.find('#map');
+        $scope.fitMap();
 
-        Router.init(element.find('#map'), $scope.originInput, $scope.destinationInput, $scope.waypointsInput);
+        Router.init($scope.mapContainer, $scope.originInput, $scope.destinationInput, $scope.waypointsInput);
       },
 
-      controller: ['$scope', 'Router',
-        function($scope, Router) {
+      controller: ['$scope', '$window','Router',
+        function($scope, $window, Router) {
           $scope.origin = '';
           $scope.destination = '';
           $scope.arrival = {
@@ -120,6 +122,10 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             if ($scope.origin === '') {
               Router.reset('origin');
             }
+          };
+
+          $scope.fitMap = function() {
+            $scope.mapContainer.height($window.innerHeight - 42);
           };
         }
       ]
