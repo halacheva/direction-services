@@ -17,10 +17,10 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
     var style = [
       { letter: 'A', color: 'FF0000' },
-      { letter: 'B', color: '00FF00' },
-      { letter: 'C', color: '0000FF' },
+      { letter: 'B', color: '00FF7F' },
+      { letter: 'C', color: '87CEEB' },
       { letter: 'D', color: 'FFFF00' },
-      { letter: 'E', color: '00FFFF' }
+      { letter: 'E', color: 'EE82EE' }
     ];
 
     return {
