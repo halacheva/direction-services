@@ -1,0 +1,7 @@
+<% content_for :javascript do %>
+  <%= javascript_include_tag "https://maps.googleapis.com/maps/api/js?false&v=3.exp&libraries=drawing,places,geometry" %>
+<% end %>
+
+<div ng-app="directionServicesApp" class="content">
+  <ds-routes></ds-routes>
+</div>

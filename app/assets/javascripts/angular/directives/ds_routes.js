@@ -15,8 +15,6 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
       controller: ['$scope', '$window','Router',
         function($scope, $window, Router) {
-          $scope.origin = '';
-          $scope.destination = '';
           $scope.waypoint = '';
           $scope.arrival = {
             date: undefined,
@@ -27,11 +25,17 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             time: undefined
           };
           $scope.options = {
-            travelMode: 'DRIVING',
+            mode: 'driving',
             waypoints: [],
-            optimizeWaypoints: false,
-            avoidHighways: false,
-            avoidTolls: false,
+            optimize: false,
+            avoid: {
+              highways: false,
+              tolls: false,
+              ferries: false,
+              unpaved: false,
+              approximateSeasonalClosure: false,
+              countryBorderCrossing: false,
+            },
             transitOptions: {
               arrivalTime: undefined,
               departureTime: undefined,
@@ -55,11 +59,11 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.reachedWaypointsLimit = function() {
-            return $scope.options.waypoints.length == 8;
+            return $scope.options.waypoints.length == 3;
           };
 
           $scope.requireStopOver = function() {
-            if ($scope.options.optimizeWaypoints) {
+            if ($scope.options.optimize) {
               $scope.options.waypoints.forEach(function(waypoint) {
                 waypoint.stopover = true;
               });
@@ -90,8 +94,10 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.findRoutes = function() {
-            Router.route($scope.options).then(function(result) {
-              $scope.routes = result.routes;
+            $scope.options.origin = $scope.originInput.val();
+            $scope.options.destination = $scope.destinationInput.val();
+            Router.route($scope.options).then(function(routes) {
+              $scope.routes = routes;
               $scope.displayedRoute = 0;
             });
           };
@@ -125,9 +131,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.clear = function() {
-            $scope.origin = '';
             $scope.originInput.val('');
-            $scope.destination = '';
             $scope.destinationInput.val('');
             $scope.waypoint = '';
             $scope.options.waypoints = [];
@@ -136,13 +140,13 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.resetDestination = function() {
-            if ($scope.destination === '') {
+            if ($scope.destinationInput.val() === '') {
               Router.reset('destination');
             }
           };
 
           $scope.resetOrigin = function() {
-            if ($scope.origin === '') {
+            if ($scope.originInput.val() === '') {
               Router.reset('origin');
             }
           };

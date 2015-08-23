@@ -2,14 +2,26 @@
 
 angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$q',
   function($window, $http, $q) {
-    var map, geocoder, directionsService, directionsRenderer;
+    var map, geocoder;
     // Holds all elements for each address: marker, searchBox, input
     var addresses = {
       origin: {},
       destination: {},
       waypoints: {}
     };
-    var routes;
+    var routes = {
+      data: [],
+      polylines: [],
+      markers: []
+    };
+
+    var style = [
+      { letter: 'A', color: 'FF0000' },
+      { letter: 'B', color: '00FF00' },
+      { letter: 'C', color: '0000FF' },
+      { letter: 'D', color: 'FFFF00' },
+      { letter: 'E', color: '00FFFF' }
+    ];
 
     return {
       init: function(mapElement, originInput, destinationInput, waypointsInput) {
@@ -41,20 +53,11 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         }
       },
 
-      clear: function() {
-        resetAddress('origin');
-        resetAddress('destination');
-        addresses.waypoints.markers.forEach(function(waypoint) {
-          if (typeof waypoint !== 'undefined') {
-            waypoint.setMap(null);
-          }
-        });
-        addresses.waypoints.markers = [];
-        directionsRenderer.setMap(null);
-      },
+      clear: clear,
 
       display: function(index) {
-        directionsRenderer.setRouteIndex(index);
+        hidePolylines();
+        routes.polylines[index].setMap(map);
       },
 
       reset: function(type) {
@@ -63,20 +66,13 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
       route: function(options) {
         var deferred = $q.defer();
-
-        directionsService.route(mergeRouteOptions(options), function(result, status) {
-          if (status == google.maps.DirectionsStatus.OK) {
-            addresses.origin.marker.setMap(null);
-            addresses.destination.marker.setMap(null);
-            addresses.waypoints.markers.forEach(function(waypoint) {
-            if (typeof waypoint !== 'undefined') {
-              waypoint.setMap(null);
-              }
-            });
-            routes = result;
-            deferred.resolve(result);
-            directionsRenderer.setMap(map);
-            directionsRenderer.setDirections(result);
+        var url = '/routes?options=' + JSON.stringify(options);
+        $http.get(url).then(function(response) {
+          if (response.statusText == google.maps.DirectionsStatus.OK) {
+            clear();
+            routes.data = response.data.routes;
+            drawRoutes();
+            deferred.resolve(routes.data);
           }
         });
 
@@ -88,8 +84,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
     function loadServices(originInput, destinationInput, waypointsInput) {
       geocoder = new google.maps.Geocoder();
-      directionsService = new google.maps.DirectionsService();
-      directionsRenderer = new google.maps.DirectionsRenderer({ map: map, draggable: true });
 
       // Origin
       addresses.origin = {
@@ -181,6 +175,45 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       });
     }
 
+    function drawRoutes() {
+      routes.data[0].legs.forEach(function(leg, index) {
+        if (index == 0) {
+          drawRouteMarker(leg.start_location);
+        }
+
+        drawRouteMarker(leg.end_location);
+      });
+
+      routes.data.forEach(function(route) {
+        var path = google.maps.geometry.encoding.decodePath(route.overview_polyline.points);
+
+        var polyline = new google.maps.Polyline({
+          path: path,
+          geodesic: true,
+          strokeColor: '#00B3FD',
+          strokeOpacity: 1.0,
+          strokeWeight: 5
+        });
+
+        routes.polylines.push(polyline);
+      });
+      routes.polylines[0].setMap(map);
+    }
+
+    function drawRouteMarker(position) {
+      var index = routes.markers.length;
+      var icon =  "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=";
+      var icon = icon + style[index].letter + "|" + style[index].color + "|000000";
+
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(position.lat, position.lng),
+        map: map,
+        icon: icon
+      });
+
+      routes.markers.push(marker);
+    }
+
     function updateViewPort() {
       var bounds = new google.maps.LatLngBounds();
       if (typeof addresses.origin.marker !== 'undefined') {
@@ -200,6 +233,15 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       map.fitBounds(bounds);
     }
 
+    function clear() {
+      resetAddress('origin');
+      resetAddress('destination');
+      hidePolylines();
+      routes.polylines = [];
+      clearRoutesMarkers();
+      clearWaypoints();
+    };
+
     function resetAddress(type) {
       if (typeof addresses[type].marker !== 'undefined') {
         addresses[type].marker.setMap(null);
@@ -209,6 +251,29 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       toggleMapCursor();
     }
 
+    function hidePolylines() {
+      routes.polylines.forEach(function(polyline) {
+        polyline.setMap(null);
+      });
+    }
+
+    function clearRoutesMarkers() {
+      routes.markers.forEach(function(marker) {
+        marker.setMap(null);
+      });
+
+      routes.markers = [];
+    }
+
+    function clearWaypoints() {
+      addresses.waypoints.markers.forEach(function(waypoint) {
+        if (typeof waypoint !== 'undefined') {
+          waypoint.setMap(null);
+        }
+      });
+      addresses.waypoints.markers = [];
+    }
+
     function toggleMapCursor() {
       if (typeof addresses.origin.marker !== 'undefined' && typeof addresses.destination.marker !== 'undefined') {
         map.draggableCursor = undefined;
@@ -216,22 +281,5 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         map.draggableCursor = 'crosshair';
       }
     }
-
-    function mergeRouteOptions(options) {
-      var defaultOptions = {
-        origin: addresses.origin.marker.position,
-        destination: addresses.destination.marker.position,
-        travelMode: google.maps.TravelMode.DRIVING,
-        provideRouteAlternatives: true
-      };
-
-      var mergedOptions = defaultOptions;
-
-      for (var key in options) {
-        mergedOptions[key] = options[key];
-      };
-
-      return mergedOptions;
-    };
   }]
 );
