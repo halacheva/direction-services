@@ -28,7 +28,6 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
           $scope.options = {
             travelMode: 'DRIVING',
-            durationInTraffic: true,
             waypoints: [],
             optimizeWaypoints: false,
             avoidHighways: false,

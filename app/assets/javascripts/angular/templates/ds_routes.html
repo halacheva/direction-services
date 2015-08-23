@@ -24,7 +24,7 @@
                 ng-disabled="waypoint === ''"
                 ng-class="{ 'btn-disabled': waypoint === '' }">Add</button>
       </div>
-      <label><input type="checkbox" ng-model="options.optimizeWaypoints" ng-show="options.waypoints.size > 0">Optimize Waypoints</label>
+      <label ng-show="options.waypoints.size > 0"><input type="checkbox" ng-model="options.optimizeWaypoints">Optimize Waypoints</label>
       <div ng-repeat="waypoint in options.waypoints track by $index">
         <span>{{ waypoint.location }}</span>
         <label>Stop Over<input type="checkbox" ng-model="waypoint.stopover"></label>
@@ -59,12 +59,10 @@
     </div>
   </div>
 
-  <div class="input-group">
-    <label><input type="checkbox" ng-model="options.durationInTraffic">Estimate duration in traffic</label>
+  <div class="input-group" ng-hide="options.travelMode == 'TRANSIT'">
+    <label><input type="checkbox" ng-model="options.avoidHighways">Avoid Highways</label>
     <br/>
-    <label ng-hide="options.travelMode == 'TRANSIT'"><input type="checkbox" ng-model="options.avoidHighways">Avoid Highways</label>
-    <br/>
-    <label ng-hide="options.travelMode == 'TRANSIT'"><input type="checkbox" ng-model="options.avoidTolls">Avoid Tolls</label>
+    <label><input type="checkbox" ng-model="options.avoidTolls">Avoid Tolls</label>
     <br/>
   </div>
   <div class="intput-group">
