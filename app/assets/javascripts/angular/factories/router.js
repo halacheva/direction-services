@@ -22,9 +22,34 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         loadServices(originInput, destinationInput, waypointsInput);
       },
 
+      addWaypoint: function() {
+        var places = addresses.waypoints.searchBox.getPlaces();
+        addresses.waypoints.markers.push(new google.maps.Marker({
+          position: places[0].geometry.location,
+          title: places[0].formatted_address,
+          map: map,
+        }));
+
+        updateViewPort();
+      },
+
+      removeWaypoint: function(index) {
+        if (typeof addresses.waypoints.markers[index] !== 'undefined') {
+          addresses.waypoints.markers[index].setMap(null);
+          addresses.waypoints.markers[index] = undefined;
+          updateViewPort();
+        }
+      },
+
       clear: function() {
         resetAddress('origin');
         resetAddress('destination');
+        addresses.waypoints.markers.forEach(function(waypoint) {
+          if (typeof waypoint !== 'undefined') {
+            waypoint.setMap(null);
+          }
+        });
+        addresses.waypoints.markers = [];
         directionsRenderer.setMap(null);
       },
 
@@ -43,6 +68,11 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
           if (status == google.maps.DirectionsStatus.OK) {
             addresses.origin.marker.setMap(null);
             addresses.destination.marker.setMap(null);
+            addresses.waypoints.markers.forEach(function(waypoint) {
+            if (typeof waypoint !== 'undefined') {
+              waypoint.setMap(null);
+              }
+            });
             routes = result;
             deferred.resolve(result);
             directionsRenderer.setMap(map);
@@ -84,7 +114,8 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       // Waypoints
       addresses.waypoints = {
         input: waypointsInput,
-        searchBox: new google.maps.places.SearchBox(waypointsInput[0])
+        searchBox: new google.maps.places.SearchBox(waypointsInput[0]),
+        markers: []
       };
 
       // Google Maps Click
@@ -159,6 +190,12 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       if (typeof addresses.destination.marker !== 'undefined') {
         bounds.extend(addresses.destination.marker.position);
       }
+
+      addresses.waypoints.markers.forEach(function(waypoint) {
+        if (typeof waypoint !== 'undefined') {
+          bounds.extend(waypoint.position);
+        }
+      });
 
       map.fitBounds(bounds);
     }

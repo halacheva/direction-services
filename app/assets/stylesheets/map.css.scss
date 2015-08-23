@@ -2,7 +2,7 @@
 }
 
 .btn {
-  outline: none;
+  outline: none !important;
 }
 
 .btn-disabled {
@@ -25,12 +25,38 @@
     margin-right: 5px;
     width: 243px;
   }
+
+  div.waypoint-info {
+    border: 2px solid #337AB7;
+    margin: 10px 0 0;
+    padding: 5px 10px;
+    color: #337AB7;
+    border-radius: 4px;
+    overflow: hidden;
+
+    p {
+      margin: 0;
+      float: left;
+      width: 225px;
+    }
+
+    button {
+      float: right;
+      margin-top: 7px;
+    }
+  }
 }
 
 #routes_list {
   list-style: none;
   padding: 0;
-  margin-top: 10px;
+  position: absolute;
+  top: 42px;
+  right: 300px;
+  z-index: 1;
+  background-color: #fff;
+  border: 5px solid #5BC0DE;
+  min-width: 400px;
 
   li {
     border-bottom: 1px solid #fff;
@@ -40,6 +66,42 @@
       background-color: #5BC0DE;
       color: #fff;
       cursor: pointer;
+    }
+
+    .route-details {
+      color: #337AB7;
+      padding: 5px 10px;
+
+      div.details {
+      }
+
+      span.key {
+        color: #286090;
+        font-weight: bold;
+      }
+
+      span.value {
+        color: #286090;
+        font-size: bold;
+      }
+
+      div#sub_routes_list {
+        p { margin: 0; }
+
+        span.title {
+          background-color: #337AB7;
+          color: #fff;
+          padding: 5px;
+          display: block;
+          text-align: center;
+        }
+
+        div.sub-route {
+          background-color: #E3EFF3;
+          border-bottom: 1px solid #fff;
+          padding: 4px 10px;
+        }
+      }
     }
   }
 }

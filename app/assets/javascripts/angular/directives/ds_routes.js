@@ -40,14 +40,29 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.addWaypoint = function() {
-            if ($scope.waypointsInput.val() !== '') {
-              var waypoint = { location: $scope.waypointsInput.val() };
+            if ($scope.waypointsInput.val() !== '' && !$scope.reachedWaypointsLimit()) {
+              var waypoint = { location: $scope.waypointsInput.val(), stopover: true };
+              Router.addWaypoint();
               $scope.options.waypoints.push(waypoint);
+              $scope.waypoint = '';
             }
           };
 
           $scope.removeWaypoint = function(index) {
             $scope.options.waypoints.splice(index, 1);
+            Router.removeWaypoint(index);
+          };
+
+          $scope.reachedWaypointsLimit = function() {
+            return $scope.options.waypoints.length == 8;
+          };
+
+          $scope.requireStopOver = function() {
+            if ($scope.options.optimizeWaypoints) {
+              $scope.options.waypoints.forEach(function(waypoint) {
+                waypoint.stopover = true;
+              });
+            }
           };
 
           $scope.toggleTravelMode = function(mode) {
@@ -110,7 +125,9 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
           $scope.clear = function() {
             $scope.origin = '';
+            $scope.originInput.val('');
             $scope.destination = '';
+            $scope.destinationInput.val('');
             $scope.waypoint = '';
             $scope.options.waypoints = [];
             $scope.routes = [];

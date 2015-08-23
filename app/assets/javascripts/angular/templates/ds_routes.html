@@ -11,31 +11,38 @@
 
   <div class="input-group">
     <label>Origin</label>
-    <input type="text" ng-model="origin" id="origin_address" ng-blur="resetOrigin()" class="form-control"/>
+    <input type="text" placeholder="Enter origin address" ng-model="origin" id="origin_address" ng-blur="resetOrigin()" class="form-control"/>
   </div>
 
   <div class="input-group" id="waypoints_container">
     <div ng-hide="options.travelMode == 'TRANSIT'">
       <label>Waypoints</label>
       <div>
-        <input type="text" class="form-control" id="waypoints" ng-model="waypoint"/>
+        <input type="text" placeholder="Enter waypoint address" class="form-control" id="waypoints" ng-model="waypoint"/>
         <button ng-click="addWaypoint()"
                 class="btn btn-info"
-                ng-disabled="waypoint === ''"
-                ng-class="{ 'btn-disabled': waypoint === '' }">Add</button>
+                ng-disabled="waypoint === '' || reachedWaypointsLimit()"
+                ng-class="{ 'btn-disabled': (waypoint === '' || reachedWaypointsLimit()) }">Add</button>
       </div>
-      <label ng-show="options.waypoints.size > 0"><input type="checkbox" ng-model="options.optimizeWaypoints">Optimize Waypoints</label>
-      <div ng-repeat="waypoint in options.waypoints track by $index">
-        <span>{{ waypoint.location }}</span>
-        <label>Stop Over<input type="checkbox" ng-model="waypoint.stopover"></label>
-        <button ng-click="removeWaypoint($index)">Remove</button>
+      <div class="waypoint-info" ng-repeat="waypoint in options.waypoints track by $index">
+        <p>
+          {{ waypoint.location }}
+          <br/>
+          <label><input type="checkbox" ng-model="waypoint.stopover">Stop Over</label>
+        </p>
+        <button ng-click="removeWaypoint($index)" class="btn btn-danger">
+          <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+        </button>
       </div>
+      <label ng-show="options.waypoints.length > 0">
+        <input type="checkbox" ng-click="requireStopOver()" ng-model="options.optimizeWaypoints">Optimize Waypoints
+      </label>
     </div>
   </div>
 
   <div class="input-group">
     <label>Destination</label>
-    <input type="text" ng-model="destination" id="destination_address" ng-blur="resetDestination()" class="form-control"/>
+    <input type="text" placeholder="Enter destination address" ng-model="destination" id="destination_address" ng-blur="resetDestination()" class="form-control"/>
   </div>
 
   <div ng-show="options.travelMode == 'TRANSIT'">
@@ -70,19 +77,38 @@
     <button type="button" class="btn btn-danger" ng-click="clear()">Clear</button>
   </div>
 
-
-  <ul id="routes_list">
+  <ul id="routes_list" ng-show="routes.length > 0">
     <li ng-repeat="route in routes track by $index"
         ng-class="{ active: displayedRoute == $index }"
         ng-click="displayRoute($index)">
       <span class="summary">{{ route.summary }}</span>
       <div class="route-details" ng-show="displayedRoute == $index">
-        <span>Total Distance: {{ calculateTotalDistance(route.legs) }}</span>
-        <span>Total Duration: {{ calculateTotalDuration(route.legs) }}</span>
+        <div class="details">
+          {{ calculateTotalDistance(route.legs) }} total distance
+          <br/>
+          {{ calculateTotalDuration(route.legs) }} total duration
+        </div>
 
-        <div ng-repeat="leg in route.legs">
-          <span> Distance: {{ leg.distance }}</span>
-          <span> Duration: {{ leg.duration }}</span>
+        <div id="sub_routes_list" ng-show="route.legs.length > 1">
+          <span class="title">Sub-routes</span>
+          <div class="sub-route" ng-repeat="leg in route.legs">
+            <p>
+              <span class='key'>Start Address: </span>
+              <span class='value'>{{ leg.start_address }}</span>
+            </p>
+            <p>
+              <span class='key'>End Address: </span>
+              <span class='value'>{{ leg.end_address }}</span>
+            </p>
+            <p>
+              <span class='key'>Distance: </span>
+              <span class='value'>{{ leg.distance.text }}</span>
+            </p>
+            <p>
+              <span class='key'>Duration: </span>
+              <span class='value'>{{ leg.duration.text }}</span>
+            </p>
+          </div>
         </div>
       </div>
     </li>
