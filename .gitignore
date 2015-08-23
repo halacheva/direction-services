@@ -16,5 +16,7 @@
 !/log/.keep
 /tmp
 
+/config/application.yml
+
 *.sublime-project
 *.sublime-workspace
