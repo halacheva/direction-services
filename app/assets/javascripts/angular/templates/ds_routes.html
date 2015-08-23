@@ -18,10 +18,13 @@
     <div ng-hide="options.travelMode == 'TRANSIT'">
       <label>Waypoints</label>
       <div>
-        <input type="text" class="form-control" id="waypoints"/>
-        <button ng-click="addWaypoint()" class="btn btn-info">Add</button>
+        <input type="text" class="form-control" id="waypoints" ng-model="waypoint"/>
+        <button ng-click="addWaypoint()"
+                class="btn btn-info"
+                ng-disabled="waypoint === ''"
+                ng-class="{ 'btn-disabled': waypoint === '' }">Add</button>
       </div>
-      <label><input type="checkbox" ng-model="options.optimizeWaypoints">Optimize Waypoints</label>
+      <label><input type="checkbox" ng-model="options.optimizeWaypoints" ng-show="options.waypoints.size > 0">Optimize Waypoints</label>
       <div ng-repeat="waypoint in options.waypoints track by $index">
         <span>{{ waypoint.location }}</span>
         <label>Stop Over<input type="checkbox" ng-model="waypoint.stopover"></label>
@@ -68,15 +71,23 @@
     <button type="button" class="btn btn-primary" ng-click="findRoutes()">Find Routes</button>
     <button type="button" class="btn btn-danger" ng-click="clear()">Clear</button>
   </div>
-  <div>
-    Total results: {{ routes.length }}
-    <div ng-repeat="route in routes track by $index">
-      Number: {{ $index + 1 }}
-      Summary: {{ route.summary }}
-      Distance: {{ calculateTotalDistance(route.legs) }}
-      Duration: {{ calculateTotalDuration(route.legs) }}
-      <button type="button" class="btn btn-default" ng-click="displayRoute($index)" ng-hide='displayedRoute == $index'>Display</button>
-    </div>
-  </div>
+
+
+  <ul id="routes_list">
+    <li ng-repeat="route in routes track by $index"
+        ng-class="{ active: displayedRoute == $index }"
+        ng-click="displayRoute($index)">
+      <span class="summary">{{ route.summary }}</span>
+      <div class="route-details" ng-show="displayedRoute == $index">
+        <span>Total Distance: {{ calculateTotalDistance(route.legs) }}</span>
+        <span>Total Duration: {{ calculateTotalDuration(route.legs) }}</span>
+
+        <div ng-repeat="leg in route.legs">
+          <span> Distance: {{ leg.distance }}</span>
+          <span> Duration: {{ leg.duration }}</span>
+        </div>
+      </div>
+    </li>
+  </ul>
 </div>
 <div id="map"></div>

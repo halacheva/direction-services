@@ -45,6 +45,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
             addresses.destination.marker.setMap(null);
             routes = result;
             deferred.resolve(result);
+            directionsRenderer.setMap(map);
             directionsRenderer.setDirections(result);
           }
         });

@@ -1,6 +1,15 @@
 .content {
 }
 
+.btn {
+  outline: none;
+}
+
+.btn-disabled {
+  background-color: #DBDCDC !important;
+  border-color: #DBDCDC !important;
+}
+
 .map-filters {
   width: 300px;
   float: right;
@@ -15,5 +24,22 @@
     float: left;
     margin-right: 5px;
     width: 243px;
+  }
+}
+
+#routes_list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+
+  li {
+    border-bottom: 1px solid #fff;
+    span.summary {
+      padding: 10px;
+      display: block;
+      background-color: #5BC0DE;
+      color: #fff;
+      cursor: pointer;
+    }
   }
 }

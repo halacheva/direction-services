@@ -17,6 +17,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
         function($scope, $window, Router) {
           $scope.origin = '';
           $scope.destination = '';
+          $scope.waypoint = '';
           $scope.arrival = {
             date: undefined,
             time: undefined
@@ -40,8 +41,10 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.addWaypoint = function() {
-            var waypoint = { location: $scope.waypointsInput.val() };
-            $scope.options.waypoints.push(waypoint);
+            if ($scope.waypointsInput.val() !== '') {
+              var waypoint = { location: $scope.waypointsInput.val() };
+              $scope.options.waypoints.push(waypoint);
+            }
           };
 
           $scope.removeWaypoint = function(index) {
@@ -109,6 +112,9 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           $scope.clear = function() {
             $scope.origin = '';
             $scope.destination = '';
+            $scope.waypoint = '';
+            $scope.options.waypoints = [];
+            $scope.routes = [];
             Router.clear();
           };
 
