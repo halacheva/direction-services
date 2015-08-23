@@ -35,7 +35,8 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             transitOptions: {
               arrivalTime: undefined,
               departureTime: undefined,
-              modes: []
+              modes: [],
+              routingPreference: undefined
             }
           };
 
@@ -65,7 +66,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             }
           };
 
-          $scope.toggleTravelMode = function(mode) {
+          $scope.togglePreferredTravelMode = function(mode) {
             var index = $scope.options.transitOptions.modes.indexOf(mode);
             if (index >= 0) {
               $scope.options.transitOptions.modes.splice(index, 1);
