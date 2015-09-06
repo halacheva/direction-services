@@ -25,17 +25,13 @@
                 ng-class="{ 'btn-disabled': (waypoint === '' || reachedWaypointsLimit()) }">Add</button>
       </div>
       <div class="waypoint-info" ng-repeat="waypoint in options.waypoints track by $index">
-        <p>
-          {{ waypoint.location }}
-          <br/>
-          <label><input type="checkbox" ng-model="waypoint.stopover">Stop Over</label>
-        </p>
+        <p>{{ waypoint.location }}</p>
         <button ng-click="removeWaypoint($index)" class="btn btn-danger">
           <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
         </button>
       </div>
       <label ng-show="options.waypoints.length > 0">
-        <input type="checkbox" ng-click="requireStopOver()" ng-model="options.optimize">Optimize Waypoints
+        <input type="checkbox" ng-model="options.optimize"/>Optimize Waypoints
       </label>
     </div>
   </div>

@@ -31,12 +31,9 @@ module Routers
       return '' if waypoints.empty?
       optimize_waypoints = 'optimize:true|' if optimize
 
-      formatted_waypoints = waypoints.map do |waypoint|
-        via = 'via:' unless waypoint[:stopover]
-        "#{via}#{waypoint[:location]}"
-      end
+      formatted_waypoints = waypoints.map { |waypoint| "#{waypoint[:location]}" }.join('|')
 
-      @options[:waypoints] = "#{optimize_waypoints}#{formatted_waypoints.join('|')}"
+      @options[:waypoints] = "#{optimize_waypoints}#{formatted_waypoints}"
     end
 
     def assign_details

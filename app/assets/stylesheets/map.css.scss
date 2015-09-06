@@ -35,14 +35,14 @@
     overflow: hidden;
 
     p {
-      margin: 0;
       float: left;
+      line-height: 34px;
       width: 225px;
+      margin: 0;
     }
 
     button {
       float: right;
-      margin-top: 7px;
     }
   }
 }

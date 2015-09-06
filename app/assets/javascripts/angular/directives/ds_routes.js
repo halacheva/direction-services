@@ -46,7 +46,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
           $scope.addWaypoint = function() {
             if ($scope.waypointsInput.val() !== '' && !$scope.reachedWaypointsLimit()) {
-              var waypoint = { location: $scope.waypointsInput.val(), stopover: true };
+              var waypoint = { location: $scope.waypointsInput.val() };
               Router.addWaypoint();
               $scope.options.waypoints.push(waypoint);
               $scope.waypoint = '';
@@ -60,14 +60,6 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
           $scope.reachedWaypointsLimit = function() {
             return $scope.options.waypoints.length == 3;
-          };
-
-          $scope.requireStopOver = function() {
-            if ($scope.options.optimize) {
-              $scope.options.waypoints.forEach(function(waypoint) {
-                waypoint.stopover = true;
-              });
-            }
           };
 
           $scope.togglePreferredTravelMode = function(mode) {
