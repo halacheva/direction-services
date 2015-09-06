@@ -37,6 +37,7 @@ module Routers
 
     def route
       @response = JSON.parse(RestClient.get("#{base_url}#{@query_parameters}"))
+      return [] unless @response['statuscode'] == 0 # successful MapQuest request
       format_route
       [@response['route']]
     end
