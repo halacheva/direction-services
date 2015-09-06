@@ -68,8 +68,8 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         var deferred = $q.defer();
         var url = '/routes?options=' + JSON.stringify(options);
         $http.get(url).then(function(response) {
-          if (response.statusText == google.maps.DirectionsStatus.OK) {
-            routes.data = response.data.routes;
+          if (response.data.length > 0) {
+            routes.data = response.data;
             drawRoutes();
             deferred.resolve(routes.data);
           }
@@ -184,7 +184,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       });
 
       routes.data.forEach(function(route) {
-        var path = google.maps.geometry.encoding.decodePath(route.overview_polyline.points);
+        var path = buildPath(route);
 
         var polyline = new google.maps.Polyline({
           path: path,
@@ -197,6 +197,20 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         routes.polylines.push(polyline);
       });
       routes.polylines[0].setMap(map);
+    }
+
+    function buildPath(route) {
+      if (route.provider == 'Google') {
+        return google.maps.geometry.encoding.decodePath(route.overview_polyline.points);
+      } else if (route.provider == 'MapQuest') {
+        var path = [];
+
+        route.path.forEach(function(point) {
+          path.push(new google.maps.LatLng(point.lat, point.lng));
+        });
+
+        return path;
+      }
     }
 
     function drawRouteMarker(position) {

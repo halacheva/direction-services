@@ -10,21 +10,21 @@ module Routers
         destination: options[:destination]
       }
 
-      avoid_features(options[:avoid])
+      avoid_preferences(options[:avoid])
       consider_waypoints(options[:waypoints], options[:optimize])
     end
 
     def route
       @response = JSON.parse(RestClient.get(base_url, params: @options))
-      assign_totals
-      @response
+      assign_details
+      @response['routes']
     end
 
     private
 
-    def avoid_features(features)
-      active_features = features.select { |_key, value| value }
-      @options[:avoid] = active_features.keys.join '|'
+    def avoid_preferences(avoid_options)
+      preferences = avoid_options.select { |_key, value| value }
+      @options[:avoid] = preferences.keys.join '|'
     end
 
     def consider_waypoints(waypoints, optimize)
@@ -39,19 +39,20 @@ module Routers
       @options[:waypoints] = "#{optimize_waypoints}#{formatted_waypoints.join('|')}"
     end
 
-    def assign_totals
+    def assign_details
       @response['routes'].each do |route|
-        route['distance'] = estimate_total_distance(route)
-        route['duration'] = estimate_total_duration(route)
+        route['provider'] = 'Google'
+        route['distance_to_text'] = ditanse_to_text(route)
+        route['duration_to_text'] = duration_to_text(route)
       end
     end
 
-    def estimate_total_distance(route)
+    def ditanse_to_text(route)
       kilometers = route['legs'].sum { |leg| leg['distance']['text'].to_f }
       "#{kilometers} km"
     end
 
-    def estimate_total_duration(route)
+    def duration_to_text(route)
       time_details = extract_time_details(route)
 
       info = ''

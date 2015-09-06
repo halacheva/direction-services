@@ -96,6 +96,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           $scope.findRoutes = function() {
             $scope.options.origin = $scope.originInput.val();
             $scope.options.destination = $scope.destinationInput.val();
+            $scope.routes = [];
             Router.clear();
             Router.route($scope.options).then(function(routes) {
               $scope.routes = routes;

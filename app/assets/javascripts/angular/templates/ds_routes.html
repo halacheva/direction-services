@@ -87,15 +87,6 @@
     <label><input type="checkbox" ng-model="options.avoid.countryBorderCrossing">Avoid Country Border Crossing</label>
   </div>
 
-  <div class="input-group" ng-hide="options.mode == 'TRANSIT'">
-    <label>Driving Style (when calculating fuel usage)</label>
-    <select class="form-control" ng-model="options.drivingStyle">
-      <option value="1">Cautious</option>
-      <option value="2">Normal</option>
-      <option value="3">Aggressive</option>
-    </select>
-  </div>
-
   <div class="intput-group">
     <button type="button" class="btn btn-primary" ng-click="findRoutes()">Find Routes</button>
     <button type="button" class="btn btn-danger" ng-click="clear()">Clear</button>
@@ -106,8 +97,9 @@
         ng-class="{ active: displayedRoute == $index }"
         ng-click="displayRoute($index)">
       <span class="summary">
+        {{ route.provider }}:
         {{ route.summary || ('Route ' + ($index + 1)) }}
-        ({{ route.distance }}, {{ route.duration }})
+        ({{ route.distance_to_text }}, {{ route.duration_to_text }})
       </span>
       <div class="route-details" ng-show="displayedRoute == $index">
         <div id="sub_routes_list">
