@@ -105,14 +105,11 @@
     <li ng-repeat="route in routes track by $index"
         ng-class="{ active: displayedRoute == $index }"
         ng-click="displayRoute($index)">
-      <span class="summary">{{ route.summary || ('Route ' + ($index + 1)) }}</span>
+      <span class="summary">
+        {{ route.summary || ('Route ' + ($index + 1)) }}
+        ({{ route.distance }}, {{ route.duration }})
+      </span>
       <div class="route-details" ng-show="displayedRoute == $index">
-        <div class="details">
-          {{ calculateTotalDistance(route.legs) }} total distance
-          <br/>
-          {{ calculateTotalDuration(route.legs) }} total duration
-        </div>
-
         <div id="sub_routes_list">
           <span class="title">Details</span>
           <div class="sub-route" ng-repeat="leg in route.legs">

@@ -96,6 +96,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           $scope.findRoutes = function() {
             $scope.options.origin = $scope.originInput.val();
             $scope.options.destination = $scope.destinationInput.val();
+            Router.clear();
             Router.route($scope.options).then(function(routes) {
               $scope.routes = routes;
               $scope.displayedRoute = 0;
@@ -105,29 +106,6 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           $scope.displayRoute = function(index) {
             Router.display(index);
             $scope.displayedRoute = index;
-          };
-
-          $scope.calculateTotalDistance = function(legs) {
-            var total = 0;
-
-            legs.forEach(function(leg) {
-              total += leg.distance.value;
-            });
-
-            return Math.round(total / 1000).toString() + 'km';
-          };
-
-          $scope.calculateTotalDuration = function(legs) {
-            var total = 0;
-
-            legs.forEach(function(leg) {
-              total += leg.duration.value;
-            });
-
-            var date = new Date(total * 1000);
-            var hours = date.getUTCHours().toString();
-            var minutes = date.getUTCMinutes().toString();
-            return hours + ' hours ' + minutes + ' mins';
           };
 
           $scope.clear = function() {

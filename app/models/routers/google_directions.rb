@@ -15,8 +15,9 @@ module Routers
     end
 
     def route
-      response = RestClient.get(base_url, params: @options)
-      JSON.parse(response)
+      @response = JSON.parse(RestClient.get(base_url, params: @options))
+      assign_totals
+      @response
     end
 
     private
@@ -36,6 +37,38 @@ module Routers
       end
 
       @options[:waypoints] = "#{optimize_waypoints}#{formatted_waypoints.join('|')}"
+    end
+
+    def assign_totals
+      @response['routes'].each do |route|
+        route['distance'] = estimate_total_distance(route)
+        route['duration'] = estimate_total_duration(route)
+      end
+    end
+
+    def estimate_total_distance(route)
+      kilometers = route['legs'].sum { |leg| leg['distance']['text'].to_f }
+      "#{kilometers} km"
+    end
+
+    def estimate_total_duration(route)
+      time_details = extract_time_details(route)
+
+      info = ''
+      info += "#{time_details[:days]} days " if time_details[:days] > 0
+      info += "#{time_details[:hours]} hours " if time_details[:hours] > 0
+      info += "#{time_details[:minutes]} mins " if time_details[:minutes] > 0
+
+      info
+    end
+
+    def extract_time_details(route)
+      seconds = route['legs'].sum { |leg| leg['duration']['value'].to_f }
+      minutes = (seconds / 60).round
+      hours = minutes / 60
+      days = hours / 24
+
+      { minutes: minutes % 60, hours: hours % 60, days: days % 24 }
     end
 
     def base_url

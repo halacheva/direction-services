@@ -69,7 +69,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         var url = '/routes?options=' + JSON.stringify(options);
         $http.get(url).then(function(response) {
           if (response.statusText == google.maps.DirectionsStatus.OK) {
-            clear();
             routes.data = response.data.routes;
             drawRoutes();
             deferred.resolve(routes.data);
