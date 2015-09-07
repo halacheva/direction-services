@@ -15,13 +15,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       polylines: [],
     };
 
-    var style = [
-      { letter: 'A', color: 'FF0000' },
-      { letter: 'B', color: '00FF7F' },
-      { letter: 'C', color: '87CEEB' },
-      { letter: 'D', color: 'FFFF00' },
-      { letter: 'E', color: 'EE82EE' }
-    ];
+    var style = [ 'A', 'B', 'C', 'D', 'E' ];
 
     return {
       init: function(mapElement, originInput, destinationInput, waypointsInput) {
@@ -44,6 +38,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
         addresses.waypoints.markers.push(marker);
         updateViewPort();
+        updateIcons();
         clear({ keepMarkers: true });
 
         return marker;
@@ -53,6 +48,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         addresses.waypoints.markers[index].setMap(null);
         addresses.waypoints.markers.splice(index, 1);
         updateViewPort();
+        updateIcons();
         clear({ keepMarkers: true });
       },
 
@@ -69,6 +65,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
       reset: function(type) {
         resetAddress(type);
+        updateIcons();
       },
 
       route: function(options) {
@@ -178,6 +175,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         }
 
         toggleMapCursor();
+        updateIcons();
       }
     }
 
@@ -269,10 +267,8 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
     }
 
     function clearWaypoints() {
-      addresses.waypoints.markers.forEach(function(waypoint) {
-        if (typeof waypoint !== 'undefined') {
-          waypoint.setMap(null);
-        }
+      addresses.waypoints.markers.forEach(function(marker) {
+        marker.setMap(null);
       });
       addresses.waypoints.markers = [];
     }
@@ -285,9 +281,26 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       }
     }
 
-    function markerIcon(type) {
+    function updateIcons(type) {
+      var index = 0
+      if (typeof addresses.origin.marker !== 'undefined') {
+        addresses.origin.marker.setIcon(iconURL(index));
+        index = index + 1;
+      }
+
+      addresses.waypoints.markers.forEach(function(marker) {
+        marker.setIcon(iconURL(index));
+        index = index + 1;
+      });
+
+      if (typeof addresses.destination.marker !== 'undefined') {
+        addresses.destination.marker.setIcon(iconURL(index));
+      }
+    }
+
+    function iconURL(index) {
       var icon = 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=';
-      return icon + style[index].letter + '|' + style[index].color + '|000000';
+      return icon + style[index] + '|F75C53';
     }
 
   }]
