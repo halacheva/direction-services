@@ -17,26 +17,23 @@ module Routers
     }
 
     def initialize(options)
-      # @options = {
-      #   key: Figaro.env.map_quest_key,
-      #   unit: 'k',
-      #   routeType: ROUTE_TYPES_TRANSLATION[options[:mode].to_sym],
-      #   from: options[:origin],
-      #   to: options[:destination]
-      # }
-      @query_parameters = "key=#{Figaro.env.map_quest_key}" \
-                          '&unit=k' \
-                          '&fullShape=true' \
-                          "&routeType=#{ROUTE_TYPES_TRANSLATION[options[:mode].to_sym]}" \
-                          "&from=#{options[:origin]}" \
-                          "&to=#{options[:destination]}" \
+      @optimize = options[:optimize]
+
+      @query = { locations: [],
+                 options: {
+                   unit: 'k',
+                   fullShape: true,
+                   routeType: ROUTE_TYPES_TRANSLATION[options[:mode].to_sym],
+                   avoids: [] } }
 
       avoid_preferences(options[:avoid])
-      # consider_waypoints(options[:waypoints], options[:optimize])
+
+      consider_locations(options)
     end
 
     def route
-      @response = JSON.parse(RestClient.get("#{base_url}#{@query_parameters}"))
+      query_string = "key=#{Figaro.env.map_quest_key}&json=#{@query.to_json}"
+      @response = JSON.parse(RestClient.get("#{base_url(@optimize)}#{query_string}"))
       return [] unless @response['info']['statuscode'] == 0 # successful MapQuest request
       format_route
       [@response['route']]
@@ -54,8 +51,14 @@ module Routers
 
     def avoid_preferences(avoid_options)
       avoid_options.each do |key, value|
-        @query_parameters += "&avoids=#{AVOID_TYPES_TRANSLATIONS[key.to_sym]}" if value
+        @query[:options][:avoids] << AVOID_TYPES_TRANSLATIONS[key.to_sym] if value
       end
+    end
+
+    def consider_locations(options)
+      @query[:locations] << options[:origin]
+      @query[:locations] += options[:waypoints].map { |waypoint| waypoint[:location] }
+      @query[:locations] << options[:destination]
     end
 
     def format_route
