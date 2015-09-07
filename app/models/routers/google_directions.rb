@@ -46,7 +46,7 @@ module Routers
 
     def ditanse_to_text(route)
       kilometers = route['legs'].sum { |leg| leg['distance']['text'].to_f }
-      "#{kilometers} km"
+      "#{kilometers.round(1)} km"
     end
 
     def duration_to_text(route)

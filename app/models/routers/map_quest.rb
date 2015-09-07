@@ -37,7 +37,7 @@ module Routers
 
     def route
       @response = JSON.parse(RestClient.get("#{base_url}#{@query_parameters}"))
-      return [] unless @response['statuscode'] == 0 # successful MapQuest request
+      return [] unless @response['info']['statuscode'] == 0 # successful MapQuest request
       format_route
       [@response['route']]
     end
@@ -54,7 +54,6 @@ module Routers
 
     def avoid_preferences(avoid_options)
       avoid_options.each do |key, value|
-        # @options[:avoid] = AVOID_TYPES_TRANSLATIONS[key.to_sym] if value
         @query_parameters += "&avoids=#{AVOID_TYPES_TRANSLATIONS[key.to_sym]}" if value
       end
     end

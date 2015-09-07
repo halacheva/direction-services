@@ -15,7 +15,6 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
       controller: ['$scope', '$window','Router',
         function($scope, $window, Router) {
-          $scope.waypoint = '';
           $scope.arrival = {
             date: undefined,
             time: undefined
@@ -46,16 +45,18 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
           $scope.addWaypoint = function() {
             if ($scope.waypointsInput.val() !== '' && !$scope.reachedWaypointsLimit()) {
-              var waypoint = { location: $scope.waypointsInput.val() };
-              Router.addWaypoint();
-              $scope.options.waypoints.push(waypoint);
-              $scope.waypoint = '';
+              var waypoint = Router.addWaypoint();
+              var locationString = waypoint.position.lat() + ',' + waypoint.position.lng();
+              $scope.options.waypoints.push({ location: locationString, title: waypoint.title });
+              $scope.waypointsInput.val('');
+              $scope.clearRoutes()
             }
           };
 
           $scope.removeWaypoint = function(index) {
             $scope.options.waypoints.splice(index, 1);
             Router.removeWaypoint(index);
+            $scope.clearRoutes()
           };
 
           $scope.reachedWaypointsLimit = function() {
@@ -86,10 +87,10 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.findRoutes = function() {
-            $scope.options.origin = $scope.originInput.val();
-            $scope.options.destination = $scope.destinationInput.val();
-            $scope.routes = [];
-            Router.clear();
+            $scope.options.origin = Router.location('origin');
+            $scope.options.destination = Router.location('destination');
+            $scope.clearRoutes();
+            Router.clear({ keepMarkers: true });
             Router.route($scope.options).then(function(routes) {
               $scope.routes = routes;
               $scope.displayedRoute = 0;
@@ -104,21 +105,35 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           $scope.clear = function() {
             $scope.originInput.val('');
             $scope.destinationInput.val('');
-            $scope.waypoint = '';
+            $scope.waypointsInput.val('');
             $scope.options.waypoints = [];
-            $scope.routes = [];
+            $scope.clearRoutes()
             Router.clear();
+          };
+
+          $scope.clearRoutes = function() {
+            $scope.routes = [];
           };
 
           $scope.resetDestination = function() {
             if ($scope.destinationInput.val() === '') {
               Router.reset('destination');
+              Router.clear({ keepMarkers: true });
+            }
+
+            if (Router.routes.polylines.length === 0) {
+              $scope.clearRoutes();
             }
           };
 
           $scope.resetOrigin = function() {
             if ($scope.originInput.val() === '') {
               Router.reset('origin');
+              Router.clear({ keepMarkers: true });
+            }
+
+            if (Router.routes.polylines.length === 0) {
+              $scope.clearRoutes();
             }
           };
 

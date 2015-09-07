@@ -18,14 +18,14 @@
     <div ng-hide="options.mode == 'TRANSIT'">
       <label>Waypoints</label>
       <div>
-        <input type="text" placeholder="Enter waypoint address" class="form-control" id="waypoints" ng-model="waypoint"/>
+        <input type="text" placeholder="Enter waypoint address" class="form-control" id="waypoints"/>
         <button ng-click="addWaypoint()"
                 class="btn btn-info"
                 ng-disabled="waypoint === '' || reachedWaypointsLimit()"
                 ng-class="{ 'btn-disabled': (waypoint === '' || reachedWaypointsLimit()) }">Add</button>
       </div>
       <div class="waypoint-info" ng-repeat="waypoint in options.waypoints track by $index">
-        <p>{{ waypoint.location }}</p>
+        <p>{{ waypoint.title }}</p>
         <button ng-click="removeWaypoint($index)" class="btn btn-danger">
           <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
         </button>

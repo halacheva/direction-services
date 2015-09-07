@@ -9,10 +9,10 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       destination: {},
       waypoints: {}
     };
+
     var routes = {
       data: [],
       polylines: [],
-      markers: []
     };
 
     var style = [
@@ -36,21 +36,24 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
       addWaypoint: function() {
         var places = addresses.waypoints.searchBox.getPlaces();
-        addresses.waypoints.markers.push(new google.maps.Marker({
+        var marker = new google.maps.Marker({
           position: places[0].geometry.location,
           title: places[0].formatted_address,
           map: map,
-        }));
+        });
 
+        addresses.waypoints.markers.push(marker);
         updateViewPort();
+        clear({ keepMarkers: true });
+
+        return marker;
       },
 
       removeWaypoint: function(index) {
-        if (typeof addresses.waypoints.markers[index] !== 'undefined') {
-          addresses.waypoints.markers[index].setMap(null);
-          addresses.waypoints.markers[index] = undefined;
-          updateViewPort();
-        }
+        addresses.waypoints.markers[index].setMap(null);
+        addresses.waypoints.markers.splice(index, 1);
+        updateViewPort();
+        clear({ keepMarkers: true });
       },
 
       clear: clear,
@@ -58,6 +61,10 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       display: function(index) {
         hidePolylines();
         routes.polylines[index].setMap(map);
+      },
+
+      location: function(type) {
+        return addresses[type].marker.position.lat() + ',' + addresses[type].marker.position.lng();
       },
 
       reset: function(type) {
@@ -69,6 +76,8 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         var url = '/routes?options=' + JSON.stringify(options);
         $http.get(url).then(function(response) {
           if (response.data.length > 0) {
+            addresses.origin.marker.setDraggable(false);
+            addresses.destination.marker.setDraggable(false);
             routes.data = response.data;
             drawRoutes();
             deferred.resolve(routes.data);
@@ -77,6 +86,8 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
         return deferred.promise;
       },
+
+      routes: routes
     };
 
     // Private methods
@@ -118,10 +129,23 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
     }
 
     function addressSearch(type) {
+      clear({ keepMarkers: true });
       var places = addresses[type].searchBox.getPlaces();
       onPlacesFound(type, places);
       updateViewPort();
     }
+
+    function clear(options) {
+      var options = options || {};
+      hidePolylines();
+      routes.polylines = [];
+
+      if (!options.keepMarkers) {
+        resetAddress('origin');
+        resetAddress('destination');
+        clearWaypoints();
+      }
+    };
 
     function locationSearch(location, type) {
       var type = selectAddressType(type);
@@ -157,7 +181,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       }
     }
 
-    function positionMarker(type, place) {
+    function positionMarker(type, place, index) {
       var location = place.geometry.location;
       var title = place.formatted_address;
 
@@ -175,14 +199,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
     }
 
     function drawRoutes() {
-      routes.data[0].legs.forEach(function(leg, index) {
-        if (index == 0) {
-          drawRouteMarker(leg.start_location);
-        }
-
-        drawRouteMarker(leg.end_location);
-      });
-
       routes.data.forEach(function(route) {
         var path = buildPath(route);
 
@@ -200,9 +216,9 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
     }
 
     function buildPath(route) {
-      if (route.provider == 'Google') {
+      if (route.provider === 'Google') {
         return google.maps.geometry.encoding.decodePath(route.overview_polyline.points);
-      } else if (route.provider == 'MapQuest') {
+      } else if (route.provider === 'MapQuest') {
         var path = [];
 
         route.path.forEach(function(point) {
@@ -211,20 +227,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
         return path;
       }
-    }
-
-    function drawRouteMarker(position) {
-      var index = routes.markers.length;
-      var icon =  "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=";
-      var icon = icon + style[index].letter + "|" + style[index].color + "|000000";
-
-      var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(position.lat, position.lng),
-        map: map,
-        icon: icon
-      });
-
-      routes.markers.push(marker);
     }
 
     function updateViewPort() {
@@ -243,17 +245,13 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         }
       });
 
-      map.fitBounds(bounds);
+      if (bounds.isEmpty()) {
+        map.setCenter({ lat: 42.6954322, lng: 23.3239467 });
+        map.setZoom(10);
+      } else {
+        map.fitBounds(bounds);
+      }
     }
-
-    function clear() {
-      resetAddress('origin');
-      resetAddress('destination');
-      hidePolylines();
-      routes.polylines = [];
-      clearRoutesMarkers();
-      clearWaypoints();
-    };
 
     function resetAddress(type) {
       if (typeof addresses[type].marker !== 'undefined') {
@@ -268,14 +266,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       routes.polylines.forEach(function(polyline) {
         polyline.setMap(null);
       });
-    }
-
-    function clearRoutesMarkers() {
-      routes.markers.forEach(function(marker) {
-        marker.setMap(null);
-      });
-
-      routes.markers = [];
     }
 
     function clearWaypoints() {
@@ -294,5 +284,11 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         map.draggableCursor = 'crosshair';
       }
     }
+
+    function markerIcon(type) {
+      var icon = 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=';
+      return icon + style[index].letter + '|' + style[index].color + '|000000';
+    }
+
   }]
 );
