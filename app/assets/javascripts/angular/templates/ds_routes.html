@@ -54,11 +54,11 @@
     </div>
     <div class="input group">
       <label>Preferred Transit Modes</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredmode('bus')"/>BUS</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredmode('rail')"/>RAIL</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredmode('subway')"/>SUBWAY</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredmode('train')"/>TRAIN</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredmode('tram')"/>TRAM</label><br/>
+      <label><input type="checkbox" ng-click="togglePreferredTravelMode('bus')"/>BUS</label><br/>
+      <label><input type="checkbox" ng-click="togglePreferredTravelMode('rail')"/>RAIL</label><br/>
+      <label><input type="checkbox" ng-click="togglePreferredTravelMode('subway')"/>SUBWAY</label><br/>
+      <label><input type="checkbox" ng-click="togglePreferredTravelMode('train')"/>TRAIN</label><br/>
+      <label><input type="checkbox" ng-click="togglePreferredTravelMode('tram')"/>TRAM</label><br/>
     </div>
     <div class="input group">
       <label>Routing Preference</label>
@@ -70,17 +70,17 @@
   </div>
 
   <div class="input-group" ng-hide="options.mode == 'TRANSIT'">
-    <label><input type="checkbox" ng-model="options.avoid.highways">Avoid Highways</label>
+    <label><input type="checkbox" ng-click="toggleAvoidPreference('highways')">Avoid Highways</label>
     <br/>
-    <label><input type="checkbox" ng-model="options.avoid.tolls">Avoid Tolls</label>
+    <label><input type="checkbox" ng-click="toggleAvoidPreference('tolls')">Avoid Tolls</label>
     <br/>
-    <label><input type="checkbox" ng-model="options.avoid.ferries">Avoid Ferries</label>
+    <label><input type="checkbox" ng-click="toggleAvoidPreference('ferries')">Avoid Ferries</label>
     <br/>
-    <label><input type="checkbox" ng-model="options.avoid.unpaved">Avoid Unpaved</label>
+    <label><input type="checkbox" ng-click="toggleAvoidPreference('unpaved')">Avoid Unpaved</label>
     <br/>
-    <label><input type="checkbox" ng-model="options.avoid.approximateSeasonalClosure">Approximate Seasonal Closure</label>
+    <label><input type="checkbox" ng-click="toggleAvoidPreference('approximateSeasonalClosure')">Approximate Seasonal Closure</label>
     <br/>
-    <label><input type="checkbox" ng-model="options.avoid.countryBorderCrossing">Avoid Country Border Crossing</label>
+    <label><input type="checkbox" ng-click="toggleAvoidPreference('countryBorderCrossing')">Avoid Country Border Crossing</label>
   </div>
 
   <div class="intput-group">

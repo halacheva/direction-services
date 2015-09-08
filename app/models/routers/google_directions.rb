@@ -7,10 +7,10 @@ module Routers
         units: 'metric',
         mode: options[:mode],
         origin: options[:origin],
-        destination: options[:destination]
+        destination: options[:destination],
+        avoid: options[:avoid].join('|')
       }
 
-      avoid_preferences(options[:avoid])
       consider_waypoints(options[:waypoints], options[:optimize])
     end
 
@@ -21,11 +21,6 @@ module Routers
     end
 
     private
-
-    def avoid_preferences(avoid_options)
-      preferences = avoid_options.select { |_key, value| value }
-      @options[:avoid] = preferences.keys.join '|'
-    end
 
     def consider_waypoints(waypoints, optimize)
       return '' if waypoints.empty?
@@ -51,7 +46,7 @@ module Routers
         leg['distance']['text'] = "#{distance} km"
         total_kilometers += distance
       end
-      "#{total_kilometers} km"
+      "#{total_kilometers.round(1)} km"
     end
 
     def duration_to_text(route)

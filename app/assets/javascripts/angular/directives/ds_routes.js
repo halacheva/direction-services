@@ -27,14 +27,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             mode: 'driving',
             waypoints: [],
             optimize: false,
-            avoid: {
-              highways: false,
-              tolls: false,
-              ferries: false,
-              unpaved: false,
-              approximateSeasonalClosure: false,
-              countryBorderCrossing: false,
-            },
+            avoid: [],
             transitOptions: {
               arrivalTime: undefined,
               departureTime: undefined,
@@ -69,6 +62,15 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
               $scope.options.transitOptions.modes.splice(index, 1);
             } else {
               $scope.options.transitOptions.modes.push(mode);
+            }
+          };
+
+          $scope.toggleAvoidPreference = function(preference) {
+            var index = $scope.options.avoid.indexOf(preference);
+            if (index >= 0) {
+              $scope.options.avoid.splice(index, 1);
+            } else {
+              $scope.options.avoid.push(preference);
             }
           };
 

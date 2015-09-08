@@ -4,7 +4,6 @@ class RoutesController < ApplicationController
 
   def find
     options = JSON.parse(params[:options], symbolize_names: true)
-
     routes = []
     routes += run_google_directions(options) unless skip_google(options)
     routes += run_map_quest(options)
@@ -15,9 +14,8 @@ class RoutesController < ApplicationController
   private
 
   def skip_google(options)
-    options[:avoid][:unpaved] ||
-      options[:avoid][:approximateSeasonalClosure] ||
-      options[:avoid][:countryBorderCrossing]
+    only_map_quest_available = %w(unpaved approximateSeasonalClosure countryBorderCrossing)
+    only_map_quest_available.any? { |preference| options[:avoid].include?(preference) }
   end
 
   def run_google_directions(options)

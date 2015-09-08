@@ -1,93 +1,108 @@
 module Routers
   class MapQuest
-    ROUTE_TYPES_TRANSLATION = {
-      driving: 'fastest',
-      walking: 'pedestrian',
-      bicycling: 'bicycle',
-      transit: 'multimodal'
-    }
+    ROUTE_TYPES_TRANSLATION = { driving: 'fastest',
+                                walking: 'pedestrian',
+                                bicycling: 'bicycle',
+                                transit: 'multimodal' }
 
-    AVOID_TYPES_TRANSLATIONS = {
-      highways: 'Limited Access',
-      tolls: 'Toll Road',
-      ferries: 'Ferry',
-      unpaved: 'Unpaved',
-      approximateSeasonalClosure: 'Approximate Seasonal Closure',
-      countryBorderCrossing: 'Country Border Crossing'
-    }
+    AVOID_TYPES_TRANSLATIONS = { highways: 'Limited Access',
+                                 tolls: 'Toll Road',
+                                 ferries: 'Ferry',
+                                 unpaved: 'Unpaved',
+                                 approximateSeasonalClosure: 'Approximate Seasonal Closure',
+                                 countryBorderCrossing: 'Country Border Crossing' }
 
     def initialize(options)
-      @optimize = options[:optimize]
-
-      @query = { locations: [],
-                 maxRoutes: 3,
-                 options: {
-                   unit: 'k',
-                   fullShape: true,
-                   routeType: ROUTE_TYPES_TRANSLATION[options[:mode].to_sym],
-                   avoids: [] } }
-
-      avoid_preferences(options[:avoid])
-
-      consider_locations(options)
+      @options = options
+      @query_string = "key=#{Figaro.env.map_quest_key}&#{build_query}"
     end
 
     def route
-      query_string = "key=#{Figaro.env.map_quest_key}&json=#{@query.to_json}"
-      @response = JSON.parse(RestClient.get("#{base_url}#{query_string}"))
-      return [] unless @response['info']['statuscode'] == 0 # successful MapQuest request
-      format_route
-      [@response['route']]
+      response = JSON.parse(RestClient.get("#{base_url}#{@query_string}"))
+      return [] unless response['info']['statuscode'] == 0 # successful MapQuest request
+      extract_routes(response)
     end
 
     private
 
     def base_url
-      if @optimized
-        'http://www.mapquestapi.com/directions/v2/optimizedroute?'
-      elsif @query[:locations].size > 2
-        'http://www.mapquestapi.com/directions/v2/route?'
-      else
-        'http://www.mapquestapi.com/directions/v2/alternateroutes?'
+      base_uri = 'http://www.mapquestapi.com/directions/v2/'
+
+      return "#{base_uri}alternateroutes?" if @options[:waypoints].empty?
+
+      @options[:optimize] ? "#{base_uri}optimizedroute?" : "#{base_uri}route?"
+    end
+
+    def build_query
+      @options[:waypoints].any? ? build_json_query : build_standard_query
+    end
+
+    def build_json_query
+      query = {
+        locations: [@options[:origin],
+                    *(@options[:waypoints].map { |waypoint| waypoint[:location] }),
+                    @options[:destination]],
+        options: {
+          unit: 'k',
+          fullShape: true,
+          routeType: ROUTE_TYPES_TRANSLATION[@options[:mode].to_sym],
+          avoids: @options[:avoid].map { |preference| AVOID_TYPES_TRANSLATIONS[preference.to_sym] }
+        }
+      }
+
+      "json=#{query.to_json}"
+    end
+
+    def build_standard_query
+      query = "unit=k&routeType=#{ROUTE_TYPES_TRANSLATION[@options[:mode].to_sym]}" \
+              "&from=#{@options[:origin]}&to=#{@options[:destination]}" \
+              '&fullShape=true&maxRoutes=3'
+
+      @options[:avoid].each do |preference|
+        query += "&avoids=#{AVOID_TYPES_TRANSLATIONS[preference.to_sym]}"
       end
+
+      query
     end
 
-    def avoid_preferences(avoid_options)
-      avoid_options.each do |key, value|
-        @query[:options][:avoids] << AVOID_TYPES_TRANSLATIONS[key.to_sym] if value
+    def extract_routes(response)
+      routes = [format_route(response['route'])]
+
+      return routes unless response['route']['alternateRoutes']
+
+      response['route']['alternateRoutes'].each do |alternative_route|
+        routes << format_route(alternative_route['route'])
       end
+
+      routes
     end
 
-    def consider_locations(options)
-      @query[:locations] << options[:origin]
-      @query[:locations] += options[:waypoints].map { |waypoint| waypoint[:location] }
-      @query[:locations] << options[:destination]
-    end
-
-    def format_route
-      @response['route']['provider'] = 'MapQuest'
-      @response['route']['distance_to_text'] = "#{@response['route']['distance'].round(1)} km"
-      @response['route']['duration_to_text'] = duration_to_text(@response['route']['formattedTime'])
-      @response['route']['path'] = extract_path
-      format_legs
-    end
-
-    def format_legs
-      @response['route']['legs'].each_with_index do |leg, index|
-        leg['distance'] = format_distance(leg)
-        leg['duration'] = format_duration(leg)
-        leg['start_location'] = leg['maneuvers'].first['startPoint']
-        leg['end_location'] = leg['maneuvers'].last['startPoint']
-        leg['start_address'] = extract_address(index)
-        leg['end_address'] = extract_address(index + 1)
+    def format_route(route)
+      route['provider'] = 'MapQuest'
+      route['distance_to_text'] = "#{route['distance'].round(1)} km"
+      route['duration_to_text'] = duration_to_text(route['formattedTime'])
+      route['path'] = extract_path(route)
+      route['legs'].map.with_index do |leg, index|
+        format_leg(leg, route['locations'], index)
       end
+
+      route
     end
 
-    def format_distance(leg)
+    def format_leg(leg, locations, index)
+      leg['distance'] = format_leg_distance(leg)
+      leg['duration'] = format_leg_duration(leg)
+      leg['start_address'] = format_address(locations[index])
+      leg['end_address'] = format_address(locations[index + 1])
+
+      leg
+    end
+
+    def format_leg_distance(leg)
       { text: "#{leg['distance'].round(1)} km", value: leg['distance'] }
     end
 
-    def format_duration(leg)
+    def format_leg_duration(leg)
       { text: "#{duration_to_text(leg['formattedTime'])}", value: leg['time'] }
     end
 
@@ -103,47 +118,16 @@ module Routers
       info
     end
 
-    def extract_address(index)
-      address_data = @response['route']['locations'][index]
-
-      info = ''
-      info += "#{address_data['street']}, " unless address_data['street'].blank?
-      info += "#{address_data['adminArea5']}, " unless address_data['adminArea5'].blank?
-      info += "#{address_data['adminArea1']}" unless address_data['adminArea1'].blank?
-
-      info
+    def format_address(location)
+      [location['street'], location['adminArea5'], location['adminArea1']].compact.join(', ')
     end
 
-    def extract_path
+    def extract_path(route)
       path = []
 
-      @response['route']['shape']['shapePoints'].each_slice(2) do |pair|
-        path << { lat: pair[0], lng: pair[1] }
-      end
+      route['shape']['shapePoints'].each_slice(2) { |pair| path << { lat: pair[0], lng: pair[1] } }
 
       path
     end
   end
 end
-# routeType
-# Specifies the type of route wanted. Acceptable values are:
-# fastest - Quickest drive time route.
-# shortest - Shortest driving distance route.
-# pedestrian - Walking route; Avoids limited access roads; Ignores turn restrictions.
-# multimodal - Combination of walking and (if available) Public Transit.
-# bicycle - Will only use roads on which bicycling is appropriate.
-# Default = 'fastest'
-
-# avoids
-# Attribute flags of roads to try to avoid. The available attribute flags depend on the data set. This does not guarantee roads with these attributes will be avoided if alternate route paths are too lengthy or not possible or roads that contain these attributes are very short.
-
-# Available choices:
-# Limited Access (highways)
-# Toll Road
-# Ferry
-# Unpaved
-# Approximate Seasonal Closure (Seasonal roads may not be selected with 100% accuracy)
-# Country Border Crossing
-
-# locations
-# optimized
