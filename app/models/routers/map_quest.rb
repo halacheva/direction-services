@@ -20,6 +20,7 @@ module Routers
       @optimize = options[:optimize]
 
       @query = { locations: [],
+                 maxRoutes: 3,
                  options: {
                    unit: 'k',
                    fullShape: true,
@@ -33,7 +34,7 @@ module Routers
 
     def route
       query_string = "key=#{Figaro.env.map_quest_key}&json=#{@query.to_json}"
-      @response = JSON.parse(RestClient.get("#{base_url(@optimize)}#{query_string}"))
+      @response = JSON.parse(RestClient.get("#{base_url}#{query_string}"))
       return [] unless @response['info']['statuscode'] == 0 # successful MapQuest request
       format_route
       [@response['route']]
@@ -41,11 +42,13 @@ module Routers
 
     private
 
-    def base_url(optimized = false)
-      if optimized
+    def base_url
+      if @optimized
         'http://www.mapquestapi.com/directions/v2/optimizedroute?'
-      else
+      elsif @query[:locations].size > 2
         'http://www.mapquestapi.com/directions/v2/route?'
+      else
+        'http://www.mapquestapi.com/directions/v2/alternateroutes?'
       end
     end
 
