@@ -94,7 +94,7 @@
         ng-click="displayRoute($index)">
       <span class="summary">
         {{ route.provider }}:
-        {{ route.summary || ('Route ' + ($index + 1)) }}
+        {{ route.summary || route.name || ('Route ' + ($index + 1)) }}
         ({{ route.distance_to_text }}, {{ route.duration_to_text }})
       </span>
       <div class="route-details" ng-show="displayedRoute == $index">
