@@ -35,6 +35,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
               routingPreference: undefined
             }
           };
+          $scope.routingInProgress = false;
 
           $scope.addWaypoint = function() {
             if ($scope.waypointsInput.val() !== '' && !$scope.reachedWaypointsLimit()) {
@@ -93,9 +94,11 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             $scope.options.destination = Router.location('destination');
             $scope.clearRoutes();
             Router.clear({ keepMarkers: true });
+            $scope.routingInProgress = true;
             Router.route($scope.options).then(function(routes) {
               $scope.routes = routes;
               $scope.displayedRoute = 0;
+              $scope.routingInProgress = false;
             });
           };
 
