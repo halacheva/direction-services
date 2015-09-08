@@ -2,6 +2,15 @@
 
 angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$q',
   function($window, $http, $q) {
+
+    google.maps.Polyline.prototype.getBounds = function() {
+      var bounds = new google.maps.LatLngBounds();
+      this.getPath().getArray().map(function(i) {
+        bounds.extend(i);
+      });
+      return bounds;
+    };
+
     var map, geocoder;
     // Holds all elements for each address: marker, searchBox, input
     var addresses = {
@@ -57,6 +66,13 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       display: function(index) {
         hidePolylines();
         routes.polylines[index].setMap(map);
+        var bounds = routes.polylines[index].getBounds();
+        map.fitBounds(bounds);
+        repositionMap(bounds);
+      },
+
+      fitMap: function() {
+        google.maps.event.trigger(map, 'resize');
       },
 
       location: function(type) {
@@ -210,7 +226,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
         routes.polylines.push(polyline);
       });
-      routes.polylines[0].setMap(map);
     }
 
     function buildPath(route) {
@@ -248,9 +263,13 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         map.setZoom(10);
       } else {
         map.fitBounds(bounds);
-        var point = map.getProjection().fromLatLngToPoint(bounds.getSouthWest())
-        map.panBy(point.x - 350, 0);
+        repositionMap(bounds);
       }
+    }
+
+    function repositionMap(bounds) {
+      var point = map.getProjection().fromLatLngToPoint(bounds.getSouthWest())
+      map.panBy(point.x - 350, 0);
     }
 
     function resetAddress(type) {

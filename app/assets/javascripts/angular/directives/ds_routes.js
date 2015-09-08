@@ -14,8 +14,8 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
         Router.init($scope.mapContainer, $scope.originInput, $scope.destinationInput, $scope.waypointsInput);
       },
 
-      controller: ['$scope', '$window','Router',
-        function($scope, $window, Router) {
+      controller: ['$scope', '$window', '$timeout', 'Router',
+        function($scope, $window, $timeout, Router) {
           $scope.arrival = {
             date: undefined,
             time: undefined
@@ -100,6 +100,12 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
               $scope.routes = routes;
               $scope.displayedRoute = 0;
               $scope.routingInProgress = false;
+
+              // wait for displaying the list with routes
+              $timeout(function() {
+                Router.fitMap();
+                $scope.displayRoute(0);
+              }, 200);
             });
           };
 
@@ -122,6 +128,8 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
           $scope.clearRoutes = function() {
             $scope.routes = [];
+            // wait for removing the list with routes
+            $timeout(function() { Router.fitMap(); }, 200);
           };
 
           $scope.resetDestination = function() {
