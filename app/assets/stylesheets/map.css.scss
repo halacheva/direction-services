@@ -40,52 +40,67 @@
 }
 
 .map-filters {
-  width: 300px;
-  float: right;
+  background-color: rgba(255, 255, 255, 0.8);
+  position: absolute;
+  top: 60px;
+  left: 80px;
+  z-index: 1;
+  padding: 20px;
+  border-radius: 4px;
+  width: 280px;
+
+  .input-group {
+    width: 100%;
+    padding: 5px 0;
+
+    div.datetime input {
+      border-radius: 4px;
+    }
+  }
+
+  #waypoints_container {
+    input[type='text'] {
+      float: left;
+      margin-right: 5px;
+      width: 184px;
+      border-radius: 4px;
+    }
+
+    div.waypoint-info {
+      border: 2px solid #337AB7;
+      margin: 10px 0 0;
+      padding: 5px 10px;
+      color: #337AB7;
+      border-radius: 4px;
+      overflow: hidden;
+
+      p {
+        float: left;
+        line-height: 34px;
+        width: 175px;
+        margin: 0;
+      }
+
+      button {
+        float: right;
+      }
+    }
+  }
 }
 
 
 #map {
 }
 
-#waypoints_container {
-  input[type='text'] {
-    float: left;
-    margin-right: 5px;
-    width: 243px;
-  }
-
-  div.waypoint-info {
-    border: 2px solid #337AB7;
-    margin: 10px 0 0;
-    padding: 5px 10px;
-    color: #337AB7;
-    border-radius: 4px;
-    overflow: hidden;
-
-    p {
-      float: left;
-      line-height: 34px;
-      width: 225px;
-      margin: 0;
-    }
-
-    button {
-      float: right;
-    }
-  }
-}
 
 #routes_list {
   list-style: none;
   padding: 0;
-  position: absolute;
-  top: 42px;
-  right: 300px;
+  float: right;
   z-index: 1;
   background-color: #fff;
   border: 5px solid #5BC0DE;
-  width: 600px;
+  width: 500px;
 
   li {
     border-bottom: 1px solid #fff;
@@ -133,4 +148,13 @@
       }
     }
   }
+}
+
+.slide {
+  transition: 0.4s linear all;
+  width: 500px;
+}
+
+.slide.ng-hide {
+  width: 0px;
 }

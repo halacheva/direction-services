@@ -248,6 +248,8 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         map.setZoom(10);
       } else {
         map.fitBounds(bounds);
+        var point = map.getProjection().fromLatLngToPoint(bounds.getSouthWest())
+        map.panBy(point.x - 350, 0);
       }
     }
 

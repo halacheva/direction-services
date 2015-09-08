@@ -47,32 +47,37 @@
     <input type="text" placeholder="Enter destination address" id="destination_address" ng-blur="resetDestination()" class="form-control"/>
   </div>
 
-  <div ng-show="options.mode == 'transit'">
-    <div class="input-group" ng-hide='options.transitOptions.arrivalTime'>
-      <label>Departure Time</label>
+  <div class="input-group" ng-hide="options.mode != 'transit' || options.transitOptions.arrivalTime">
+    <label>Departure Time</label>
+    <div class="datetime">
       <input ng-model="departure.date" class="form-control" ng-change="setDateTime('departure')" type="date"/>
       <input ng-model="departure.time" class="form-control" ng-change="setDateTime('departure')" type="time"/>
     </div>
-    <div class="input-group" ng-hide='options.transitOptions.departureTime'>
-      <label> Arrival Time</label>
+  </div>
+
+  <div class="input-group" ng-hide="options.mode != 'transit' || options.transitOptions.departureTime">
+    <label> Arrival Time</label>
+    <div class="datetime">
       <input ng-model="arrival.date" class="form-control" ng-change="setDateTime('arrival')" type="date"/>
       <input ng-model="arrival.time" class="form-control" ng-change="setDateTime('arrival')" type="time"/>
     </div>
-    <div class="input group">
-      <label>Preferred Transit Modes</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredTravelMode('bus')"/>BUS</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredTravelMode('rail')"/>RAIL</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredTravelMode('subway')"/>SUBWAY</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredTravelMode('train')"/>TRAIN</label><br/>
-      <label><input type="checkbox" ng-click="togglePreferredTravelMode('tram')"/>TRAM</label><br/>
-    </div>
-    <div class="input group">
-      <label>Routing Preference</label>
-      <select class="form-control" ng-model="options.transitOptions.routingPreference">
-        <option value="FEWER_TRANSFERS">Fewer Transfers</option>
-        <option value="LESS_WALKING">Less Walking</option>
-      </select>
-    </div>
+  </div>
+
+  <div class="input group" ng-show="options.mode == 'transit'">
+    <label>Preferred Transit Modes</label><br/>
+    <label><input type="checkbox" ng-click="togglePreferredTravelMode('bus')"/>BUS</label><br/>
+    <label><input type="checkbox" ng-click="togglePreferredTravelMode('rail')"/>RAIL</label><br/>
+    <label><input type="checkbox" ng-click="togglePreferredTravelMode('subway')"/>SUBWAY</label><br/>
+    <label><input type="checkbox" ng-click="togglePreferredTravelMode('train')"/>TRAIN</label><br/>
+    <label><input type="checkbox" ng-click="togglePreferredTravelMode('tram')"/>TRAM</label><br/>
+  </div>
+
+  <div class="input group" ng-show="options.mode == 'transit'">
+    <label>Routing Preference</label>
+    <select class="form-control" ng-model="options.transitOptions.routingPreference">
+      <option value="FEWER_TRANSFERS">Fewer Transfers</option>
+      <option value="LESS_WALKING">Less Walking</option>
+    </select>
   </div>
 
   <div class="input-group" ng-hide="options.mode == 'transit'">
@@ -89,52 +94,52 @@
     <label><input type="checkbox" ng-click="toggleAvoidPreference('countryBorderCrossing')">Avoid Country Border Crossing</label>
   </div>
 
-  <div class="intput-group">
+  <div class="input-group">
     <button type="button" class="btn btn-primary" ng-click="findRoutes()">Find Routes</button>
     <button type="button" class="btn btn-danger" ng-click="clear()">Clear</button>
   </div>
+</div>
 
-  <ul id="routes_list" ng-show="routes.length > 0">
-    <li ng-repeat="route in routes track by $index"
-        ng-class="{ active: displayedRoute == $index }"
-        ng-click="displayRoute($index)">
-      <span class="summary">
-        {{ route.provider }}:
-        {{ route.summary || route.name || ('Route ' + ($index + 1)) }}
-        ({{ route.distance_to_text }}, {{ route.duration_to_text }})
-      </span>
-      <div class="route-details" ng-show="displayedRoute == $index">
-        <div id="sub_routes_list">
-          <span class="title">Details</span>
-          <div class="sub-route" ng-repeat="leg in route.legs">
-            <p>
-              <span class='key'>Start Address: </span>
-              <span class='value'>{{ leg.start_address }}</span>
-            </p>
-            <p ng-show="leg.departure_time">
-              <span class='key'>Departure Time: </span>
-              <span class='value'>{{ leg.departure_time.text }} ({{ leg.departure_time.time_zone }})</span>
-            </p>
-            <p>
-              <span class='key'>End Address: </span>
-              <span class='value'>{{ leg.end_address }}</span>
-            </p>
-            <p ng-show="leg.arrival_time">
-              <span class='key'>Arrival Time: </span>
-              <span class='value'>{{ leg.arrival_time.text}} ({{ leg.arrival_time.time_zone }})</span>
-            </p>
-            <p>
-              <span class='key'>Distance: </span>
-              <span class='value'>{{ leg.distance.text }}</span>
-            </p>
-            <p>
-              <span class='key'>Duration: </span>
-              <span class='value'>{{ leg.duration.text }}</span>
-            </p>
-          </div>
+<ul id="routes_list" ng-show="routes.length > 0">
+  <li ng-repeat="route in routes track by $index"
+      ng-class="{ active: displayedRoute == $index }"
+      ng-click="displayRoute($index)">
+    <span class="summary">
+      {{ route.provider }}:
+      {{ route.summary || route.name || ('Route ' + ($index + 1)) }}
+      ({{ route.distance_to_text }}, {{ route.duration_to_text }})
+    </span>
+    <div class="route-details" ng-show="displayedRoute == $index">
+      <div id="sub_routes_list">
+        <span class="title">Details</span>
+        <div class="sub-route" ng-repeat="leg in route.legs">
+          <p>
+            <span class='key'>Start Address: </span>
+            <span class='value'>{{ leg.start_address }}</span>
+          </p>
+          <p ng-show="leg.departure_time">
+            <span class='key'>Departure Time: </span>
+            <span class='value'>{{ leg.departure_time.text }} ({{ leg.departure_time.time_zone }})</span>
+          </p>
+          <p>
+            <span class='key'>End Address: </span>
+            <span class='value'>{{ leg.end_address }}</span>
+          </p>
+          <p ng-show="leg.arrival_time">
+            <span class='key'>Arrival Time: </span>
+            <span class='value'>{{ leg.arrival_time.text}} ({{ leg.arrival_time.time_zone }})</span>
+          </p>
+          <p>
+            <span class='key'>Distance: </span>
+            <span class='value'>{{ leg.distance.text }}</span>
+          </p>
+          <p>
+            <span class='key'>Duration: </span>
+            <span class='value'>{{ leg.duration.text }}</span>
+          </p>
         </div>
       </div>
-    </li>
-  </ul>
-</div>
+    </div>
+  </li>
+</ul>
 <div id="map"></div>
