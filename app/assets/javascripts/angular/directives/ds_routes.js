@@ -8,6 +8,7 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
         $scope.destinationInput = element.find('#destination_address');
         $scope.waypointsInput = element.find('#waypoints');
         $scope.mapContainer = element.find('#map');
+        $scope.checkboxes = element.find("input[type='checkbox']");
         $scope.fitMap();
 
         Router.init($scope.mapContainer, $scope.originInput, $scope.destinationInput, $scope.waypointsInput);
@@ -111,8 +112,11 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             $scope.originInput.val('');
             $scope.destinationInput.val('');
             $scope.waypointsInput.val('');
+            $scope.checkboxes.attr('checked', false);
+            $scope.options.mode = 'driving';
             $scope.options.waypoints = [];
-            $scope.clearRoutes()
+            $scope.options.avoid = [];
+            $scope.clearRoutes();
             Router.clear();
           };
 

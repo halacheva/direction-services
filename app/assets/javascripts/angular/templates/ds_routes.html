@@ -21,7 +21,7 @@
   </div>
 
   <div class="input-group" id="waypoints_container">
-    <div ng-hide="options.mode == 'TRANSIT'">
+    <div ng-hide="options.mode == 'transit'">
       <label>Waypoints</label>
       <div>
         <input type="text" placeholder="Enter waypoint address" class="form-control" id="waypoints"/>
@@ -47,7 +47,7 @@
     <input type="text" placeholder="Enter destination address" id="destination_address" ng-blur="resetDestination()" class="form-control"/>
   </div>
 
-  <div ng-show="options.mode == 'TRANSIT'">
+  <div ng-show="options.mode == 'transit'">
     <div class="input-group" ng-hide='options.transitOptions.arrivalTime'>
       <label>Departure Time</label>
       <input ng-model="departure.date" class="form-control" ng-change="setDateTime('departure')" type="date"/>
@@ -75,7 +75,7 @@
     </div>
   </div>
 
-  <div class="input-group" ng-hide="options.mode == 'TRANSIT'">
+  <div class="input-group" ng-hide="options.mode == 'transit'">
     <label><input type="checkbox" ng-click="toggleAvoidPreference('highways')">Avoid Highways</label>
     <br/>
     <label><input type="checkbox" ng-click="toggleAvoidPreference('tolls')">Avoid Tolls</label>
