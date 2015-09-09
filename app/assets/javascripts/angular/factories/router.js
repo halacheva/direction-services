@@ -66,9 +66,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       display: function(index) {
         hidePolylines();
         routes.polylines[index].setMap(map);
-        var bounds = routes.polylines[index].getBounds();
-        map.fitBounds(bounds);
-        repositionMap(bounds);
       },
 
       fitMap: function() {
@@ -244,6 +241,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
     function updateViewPort() {
       var bounds = new google.maps.LatLngBounds();
+
       if (typeof addresses.origin.marker !== 'undefined') {
         bounds.extend(addresses.origin.marker.position);
       }
@@ -258,18 +256,27 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         }
       });
 
-      if (bounds.isEmpty()) {
-        map.setCenter({ lat: 42.6954322, lng: 23.3239467 });
-        map.setZoom(10);
-      } else {
-        map.fitBounds(bounds);
-        repositionMap(bounds);
-      }
+      google.maps.event.addListenerOnce(map, 'bounds_changed', function(event) {
+        if (behindTheFilters(bounds)) {
+          map.setZoom(map.getZoom() - 1);
+        }
+      });
+
+      map.fitBounds(bounds);
     }
 
-    function repositionMap(bounds) {
-      var point = map.getProjection().fromLatLngToPoint(bounds.getSouthWest())
-      map.panBy(point.x - 350, 0);
+    function behindTheFilters(bounds) {
+      var scale = Math.pow(2, map.getZoom());
+      var mapBounds = map.getBounds();
+      var nw = new google.maps.LatLng(mapBounds.getNorthEast().lat(), mapBounds.getSouthWest().lng());
+      var worldCoordinateNW = map.getProjection().fromLatLngToPoint(nw);
+      var worldCoordinate = map.getProjection().fromLatLngToPoint(bounds.getSouthWest());
+      var pixelOffset = new google.maps.Point(
+          Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale),
+          Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale)
+      );
+
+      return pixelOffset.x < 380;
     }
 
     function resetAddress(type) {
