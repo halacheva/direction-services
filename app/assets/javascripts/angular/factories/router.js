@@ -63,9 +63,14 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
       clear: clear,
 
-      display: function(index) {
-        hidePolylines();
-        routes.polylines[index].setMap(map);
+      display: function(selectedIndex) {
+        routes.polylines.forEach(function(polyline, index) {
+          if (index == selectedIndex) {
+            polyline.setOptions({ strokeColor: '#00B3FD', zIndex: 2 });
+          } else {
+            polyline.setOptions({ strokeColor: '#908E8E', zIndex: 1 });
+          }
+        });
       },
 
       fitMap: function() {
@@ -147,7 +152,10 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
 
     function clear(options) {
       var options = options || {};
-      hidePolylines();
+
+      routes.polylines.forEach(function(polyline) {
+        polyline.setMap(null);
+      });
       routes.polylines = [];
 
       if (!options.keepMarkers) {
@@ -216,9 +224,10 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
         var polyline = new google.maps.Polyline({
           path: path,
           geodesic: true,
-          strokeColor: '#00B3FD',
+          strokeColor: '#908E8E',
           strokeOpacity: 1.0,
-          strokeWeight: 5
+          strokeWeight: 5,
+          map: map
         });
 
         routes.polylines.push(polyline);
@@ -286,12 +295,6 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
       }
 
       toggleMapCursor();
-    }
-
-    function hidePolylines() {
-      routes.polylines.forEach(function(polyline) {
-        polyline.setMap(null);
-      });
     }
 
     function clearWaypoints() {
