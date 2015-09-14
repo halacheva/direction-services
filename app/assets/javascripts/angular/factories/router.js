@@ -277,15 +277,14 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
     function behindTheFilters(bounds) {
       var scale = Math.pow(2, map.getZoom());
       var mapBounds = map.getBounds();
-      var nw = new google.maps.LatLng(mapBounds.getNorthEast().lat(), mapBounds.getSouthWest().lng());
-      var worldCoordinateNW = map.getProjection().fromLatLngToPoint(nw);
-      var worldCoordinate = map.getProjection().fromLatLngToPoint(bounds.getSouthWest());
-      var pixelOffset = new google.maps.Point(
-          Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale),
-          Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale)
-      );
+      // Get the most North-west visible geographical point
+      var northWest = new google.maps.LatLng(mapBounds.getNorthEast().lat(),
+                                             mapBounds.getSouthWest().lng());
+      var mapNWPoint = map.getProjection().fromLatLngToPoint(northWest);
+      var boundsSWPoint = map.getProjection().fromLatLngToPoint(bounds.getSouthWest());
+      var pixelOffsetX = Math.floor((boundsSWPoint.x - mapNWPoint.x) * scale);
 
-      return pixelOffset.x < 380;
+      return pixelOffsetX < 380;
     }
 
     function resetAddress(type) {
