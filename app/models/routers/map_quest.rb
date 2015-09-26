@@ -76,16 +76,16 @@ module Routers
       routes
     end
 
-    def format_route(route)
-      route['provider'] = 'MapQuest'
-      route['distance_to_text'] = "#{route['distance'].round(1)} km"
-      route['duration_to_text'] = duration_to_text(route['formattedTime'])
-      route['path'] = extract_path(route)
-      route['legs'].map.with_index do |leg, index|
-        format_leg(leg, route['locations'], index)
+    def format_route(response_route)
+      response_route['provider'] = 'MapQuest'
+      response_route['distance_to_text'] = "#{response_route['distance'].round(1)} km"
+      response_route['duration_to_text'] = duration_to_text(response_route['formattedTime'])
+      response_route['path'] = extract_path(response_route)
+      response_route['legs'].map.with_index do |leg, index|
+        format_leg(leg, response_route['locations'], index)
       end
 
-      route
+      response_route
     end
 
     def format_leg(leg, locations, index)
@@ -106,6 +106,7 @@ module Routers
     end
 
     def duration_to_text(formatted_time)
+      # formatted time looks like 12:10:10
       hours, minutes = formatted_time.split(':').map(&:to_i)
       days = hours / 24
 
@@ -121,10 +122,12 @@ module Routers
       [location['street'], location['adminArea5'], location['adminArea1']].compact.join(', ')
     end
 
-    def extract_path(route)
+    def extract_path(response_route)
       path = []
 
-      route['shape']['shapePoints'].each_slice(2) { |pair| path << { lat: pair[0], lng: pair[1] } }
+      response_route['shape']['shapePoints'].each_slice(2) do |pair|
+        path << { lat: pair[0], lng: pair[1] }
+      end
 
       path
     end

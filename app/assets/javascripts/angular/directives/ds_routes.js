@@ -16,25 +16,11 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
       controller: ['$scope', '$window', '$timeout', 'Router',
         function($scope, $window, $timeout, Router) {
-          $scope.arrival = {
-            date: undefined,
-            time: undefined
-          };
-          $scope.departure = {
-            date: undefined,
-            time: undefined
-          };
           $scope.options = {
             mode: 'driving',
             waypoints: [],
             optimize: false,
             avoid: [],
-            transitOptions: {
-              arrivalTime: undefined,
-              departureTime: undefined,
-              modes: [],
-              routingPreference: undefined
-            }
           };
           $scope.routingInProgress = false;
 
@@ -58,35 +44,12 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             return $scope.options.waypoints.length == 3;
           };
 
-          $scope.togglePreferredTravelMode = function(mode) {
-            var index = $scope.options.transitOptions.modes.indexOf(mode);
-            if (index >= 0) {
-              $scope.options.transitOptions.modes.splice(index, 1);
-            } else {
-              $scope.options.transitOptions.modes.push(mode);
-            }
-          };
-
           $scope.toggleAvoidPreference = function(preference) {
             var index = $scope.options.avoid.indexOf(preference);
             if (index >= 0) {
               $scope.options.avoid.splice(index, 1);
             } else {
               $scope.options.avoid.push(preference);
-            }
-          };
-
-          $scope.setDateTime = function(type) {
-            if ($scope[type].date && $scope[type].time) {
-              var year = $scope[type].date.getFullYear();
-              var month = $scope[type].date.getMonth();
-              var day = $scope[type].date.getDate();
-              var hours = $scope[type].time.getHours();
-              var minutes = $scope[type].time.getMinutes();
-
-              $scope.options.transitOptions[type + 'Time'] =  new Date(year, month, day, hours, minutes);
-            } else {
-              $scope.options.transitOptions[type + 'Time'] = undefined;
             }
           };
 

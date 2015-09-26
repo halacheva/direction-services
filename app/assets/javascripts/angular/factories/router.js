@@ -237,7 +237,7 @@ angular.module('directionServicesApp').factory('Router', ['$window', '$http', '$
     function buildPath(route) {
       if (route.provider === 'Google') {
         return google.maps.geometry.encoding.decodePath(route.overview_polyline.points);
-      } else if (route.provider === 'MapQuest') {
+      } else {
         var path = [];
 
         route.path.forEach(function(point) {
