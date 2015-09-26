@@ -1,9 +1,8 @@
 module Routers
   class MapQuest
     ROUTE_TYPES_TRANSLATION = { driving: 'fastest',
-                                walking: 'pedestrian',
                                 bicycling: 'bicycle',
-                                transit: 'multimodal' }
+                                walking: 'pedestrian' }
 
     AVOID_TYPES_TRANSLATIONS = { highways: 'Limited Access',
                                  tolls: 'Toll Road',
