@@ -156,3 +156,12 @@
 .slide.ng-hide {
   width: 0px;
 }
+
+.user-form {
+  width: 400px;
+  margin: 20px 71px;
+
+  .has-error * {
+    color: '#a94442'
+  }
+}
