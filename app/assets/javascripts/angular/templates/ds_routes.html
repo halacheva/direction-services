@@ -79,11 +79,11 @@
       </span>
       <span class="evaluate">
         <div class="positive">
-          <span class="total">{{ route.evaluations.positive }}</span>
+          <span class="total" ng-show="route.evaluations.positive > 0">{{ route.evaluations.positive }}</span>
           <span ng-click="evaluateRoute($index, true)"class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
         </div>
         <div class="negative">
-          <span class="total">{{ route.evaluations.negative }}</span>
+          <span class="total" ng-show="route.evaluations.negative > 0">{{ route.evaluations.negative }}</span>
           <span ng-click="evaluateRoute($index, false)"class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
         </div>
       </span>
