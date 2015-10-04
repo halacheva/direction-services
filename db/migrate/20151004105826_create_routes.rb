@@ -7,6 +7,8 @@ class CreateRoutes < ActiveRecord::Migration
       t.string :mode, null: false
       t.float :distance_in_meters, null: false
       t.float :duration_in_seconds, null: false
+
+      t.timestamps
     end
   end
 end

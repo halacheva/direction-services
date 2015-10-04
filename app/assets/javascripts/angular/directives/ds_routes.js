@@ -14,8 +14,8 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
         Router.init($scope.mapContainer, $scope.originInput, $scope.destinationInput, $scope.waypointsInput);
       },
 
-      controller: ['$scope', '$window', '$timeout', 'Router',
-        function($scope, $window, $timeout, Router) {
+      controller: ['$scope', '$window', '$timeout', '$http', 'Router',
+        function($scope, $window, $timeout, $http, Router) {
           $scope.options = {
             mode: 'driving',
             waypoints: [],
@@ -125,6 +125,16 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
 
           $scope.fitMap = function() {
             $scope.mapContainer.height($window.innerHeight - 42);
+          };
+
+          $scope.evaluateRoute = function(index, positive) {
+            var url = '/evaluate?';
+            url += 'positive=' + positive;
+            url += '&route=' + JSON.stringify($scope.routes[index]);
+
+            $http.get(url).then(function(response) {
+              debugger;
+            });
           };
         }
       ]

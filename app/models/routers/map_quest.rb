@@ -87,9 +87,7 @@ module Routers
       route_response['duration_to_text'] = duration_to_text(route_response['formattedTime'])
       route_response['path'] = extract_path(route_response)
       route_response['legs'] = format_legs(route_response)
-      route_response['id'] = Route.find_or_create(route_response)
-
-      route_response
+      assign_evaluation_details(route_response)
     end
 
     def assing_metadata(route_response)
@@ -97,6 +95,14 @@ module Routers
       route_response['origin'] = @options[:origin][:title]
       route_response['destination'] = @options[:destination][:title]
       route_response['mode'] = @options[:mode]
+
+      route_response
+    end
+
+    def assign_evaluation_details(route_response)
+      route_object = Route.find_or_create(route_response)
+      route_response['id'] = route_object.id
+      route_response['evaluations'] = route_object.format_evaluations
 
       route_response
     end

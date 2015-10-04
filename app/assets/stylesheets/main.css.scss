@@ -111,19 +111,29 @@
       overflow: hidden;
 
       span.summary {
-        width: 448px;
+        width: 430px;
         float: left;
       }
 
       span.evaluate {
-        width: 32px;
+        width: 50px;
         float: right;
+        text-align: right;
 
-        .like:hover, .like.active {
-          color: #02FF02;
+        .positive {
+          color: #336D33;
+
+          span.glyphicon:hover {
+            color: #02FF02;
+          }
         }
-        .dislike:hover, .dislike.active {
-          color: #FF001F;
+
+        .negative {
+          color: #A55761;
+
+          span.glyphicon:hover {
+            color: #FF001F;
+          }
         }
 
       }

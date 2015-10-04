@@ -81,9 +81,7 @@ module Routers
         'duration_to_text' => duration_to_text(totals[:duration])
       }
 
-      route_response['id'] = Route.find_or_create(route_response)
-
-      route_response
+      assign_evaluation_details(route_response)
     end
 
     def duration_to_text(duration_in_seconds)
@@ -113,6 +111,14 @@ module Routers
         distance: total_distance,
         duration: total_duration
       }
+    end
+
+    def assign_evaluation_details(route_response)
+      route_object = Route.find_or_create(route_response)
+      route_response['id'] = route_object.id
+      route_response['evaluations'] = route_object.format_evaluations
+
+      route_response
     end
   end
 end

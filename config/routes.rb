@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   root 'routes#index'
 
   get '/routes', to: 'routes#find'
+  get '/evaluate', to: 'routes#evaluate'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

@@ -12,6 +12,10 @@ class RoutesController < ApplicationController
     render json: routes
   end
 
+  def evaluate
+    byebug
+  end
+
   private
 
   def skip_google(options)

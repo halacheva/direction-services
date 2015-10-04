@@ -75,8 +75,14 @@
         ({{ route.distance_to_text }}, {{ route.duration_to_text }})
       </span>
       <span class="evaluate">
-        <span ng-click="evaluate(true)"class="like glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
-        <span ng-click="evaluate(false)"class="dislike glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
+        <div class="positive">
+          <span class="total">{{ route.evaluations.positive }}</span>
+          <span ng-click="evaluateRoute($index, true)"class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+        </div>
+        <div class="negative">
+          <span class="total">{{ route.evaluations.negative }}</span>
+          <span ng-click="evaluateRoute($index, false)"class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
+        </div>
       </span>
     </span>
     <div class="route-details" ng-show="displayedRoute == $index">

@@ -1,7 +1,17 @@
 class Route < ActiveRecord::Base
+  has_many :evaluations
+  has_many :users, through: :evaluations
+
+  def format_evaluations
+    {
+      positive: evaluations.where(positive: true).size,
+      negative: evaluations.where(positive: false).size
+    }
+  end
+
   class << self
     def find_or_create(route)
-      where(attributes(route)).first_or_create.id
+      where(attributes(route)).first_or_create
     end
 
     private
