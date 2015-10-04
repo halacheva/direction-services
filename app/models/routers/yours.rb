@@ -11,9 +11,7 @@ module Routers
         fast: 1
       }
 
-      @points = [options[:origin],
-                 *(options[:waypoints].map { |waypoint| waypoint[:location] }),
-                 options[:destination]]
+      @points = [options[:origin], *options[:waypoints], options[:destination]]
     end
 
     def route
@@ -23,7 +21,7 @@ module Routers
       @points.each_cons(2) do |pair|
         response = make_request(pair)
         path += format_path(response)
-        legs << format_leg(response)
+        legs << format_leg(response, pair)
       end
 
       [format_route(path, legs)]
@@ -32,8 +30,8 @@ module Routers
     private
 
     def make_request(pair)
-      @options[:flat], @options[:flon] = pair[0].split(',')
-      @options[:tlat], @options[:tlon] = pair[1].split(',')
+      @options[:flat], @options[:flon] = pair[0][:location].split(',')
+      @options[:tlat], @options[:tlon] = pair[1][:location].split(',')
 
       JSON.parse(RestClient.get(base_url, params: @options))
     end
@@ -46,12 +44,14 @@ module Routers
       response['coordinates'].map { |pair| { lat: pair[1], lng: pair[0] } }
     end
 
-    def format_leg(response)
+    def format_leg(response, pair)
       {
         distance: { text: "#{response['properties']['distance'].to_f.round(1)} km",
                     value: response['properties']['distance'].to_f },
         duration: { text: duration_to_text(response['properties']['traveltime'].to_i),
-                    value: response['properties']['traveltime'].to_i }
+                    value: response['properties']['traveltime'].to_i },
+        start_address: pair[0][:title],
+        end_address: pair[1][:title]
       }
     end
 
@@ -72,7 +72,7 @@ module Routers
       info = ''
       info += "#{time_details[:days]} days " if time_details[:days] > 0
       info += "#{time_details[:hours]} hours " if time_details[:hours] > 0
-      info += "#{time_details[:minutes]} mins " if time_details[:minutes] > 0
+      info += "#{time_details[:minutes]} mins" if time_details[:minutes] > 0
 
       info
     end

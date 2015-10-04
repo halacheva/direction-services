@@ -54,10 +54,17 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.findRoutes = function() {
-            $scope.options.origin = Router.location('origin');
-            $scope.options.destination = Router.location('destination');
+            $scope.options.origin = {
+              location: Router.location('origin'),
+              title: $scope.originInput.val()
+            };
+            $scope.options.destination = {
+              location: Router.location('destination'),
+              title: $scope.destinationInput.val()
+            };
             $scope.clearRoutes();
             Router.clear({ keepMarkers: true });
+            $scope.locations = [$scope.originInput.val(), ]
             $scope.routingInProgress = true;
             Router.route($scope.options).then(function(routes) {
               $scope.routes = routes;

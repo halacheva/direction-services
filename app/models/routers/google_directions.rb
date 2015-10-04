@@ -6,8 +6,8 @@ module Routers
         alternatives: true,
         units: 'metric',
         mode: options[:mode],
-        origin: options[:origin],
-        destination: options[:destination],
+        origin: options[:origin][:location],
+        destination: options[:destination][:location],
         avoid: options[:avoid].join('|')
       }
 
@@ -55,7 +55,7 @@ module Routers
       info = ''
       info += "#{time_details[:days]} days " if time_details[:days] > 0
       info += "#{time_details[:hours]} hours " if time_details[:hours] > 0
-      info += "#{time_details[:minutes]} mins " if time_details[:minutes] > 0
+      info += "#{time_details[:minutes]} mins" if time_details[:minutes] > 0
 
       info
     end

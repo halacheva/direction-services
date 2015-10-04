@@ -38,9 +38,9 @@ module Routers
 
     def build_json_query
       query = {
-        locations: [@options[:origin],
+        locations: [@options[:origin][:location],
                     *(@options[:waypoints].map { |waypoint| waypoint[:location] }),
-                    @options[:destination]],
+                    @options[:destination][:location]],
         options: {
           unit: 'k',
           fullShape: true,
@@ -54,7 +54,8 @@ module Routers
 
     def build_standard_query
       query = "unit=k&routeType=#{ROUTE_TYPES_TRANSLATION[@options[:mode].to_sym]}" \
-              "&from=#{@options[:origin]}&to=#{@options[:destination]}" \
+              "&from=#{@options[:origin][:location]}" \
+              "&to=#{@options[:destination][:location]}" \
               '&fullShape=true&maxRoutes=3'
 
       @options[:avoid].each do |preference|
@@ -113,7 +114,7 @@ module Routers
       info = ''
       info += "#{days % 24} days " if days > 0
       info += "#{hours % 24} hours " if hours > 0
-      info += "#{minutes} mins " if minutes > 0
+      info += "#{minutes} mins" if minutes > 0
 
       info
     end
