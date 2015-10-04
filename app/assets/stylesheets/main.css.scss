@@ -161,7 +161,7 @@
   width: 400px;
   margin: 20px 71px;
 
-  .has-error * {
-    color: '#a94442'
+  .has-error label, .error-message {
+    color: #a94442;
   }
 }
