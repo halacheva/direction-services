@@ -6,8 +6,8 @@ module Routers
         alternatives: true,
         units: 'metric',
         mode: options[:mode],
-        origin: options[:origin][:location],
-        destination: options[:destination][:location],
+        origin: options[:origin],
+        destination: options[:destination],
         avoid: options[:avoid].join('|')
       }
 
@@ -15,7 +15,10 @@ module Routers
     end
 
     def route
-      @response = JSON.parse(RestClient.get(base_url, params: @options))
+      params = @options.clone
+      params[:origin] = @options[:origin][:location]
+      params[:destination] = @options[:destination][:location]
+      @response = JSON.parse(RestClient.get(base_url, params: params))
       assign_details
       @response['routes']
     end
@@ -32,16 +35,26 @@ module Routers
     end
 
     def assign_details
-      @response['routes'].each do |route|
-        route['provider'] = 'Google'
-        route['distance_to_text'] = ditanse_to_text(route)
-        route['duration_to_text'] = duration_to_text(route)
+      @response['routes'].each do |route_response|
+        route_response = assing_metadata(route_response)
+        route_response['distance_to_text'] = ditanse_to_text(route_response)
+        route_response['duration_to_text'] = duration_to_text(route_response)
+        route_response['id'] = Route.find_or_create(route_response)
       end
     end
 
-    def ditanse_to_text(route)
+    def assing_metadata(route_response)
+      route_response['provider'] = 'Google'
+      route_response['origin'] = @options[:origin][:title]
+      route_response['destination'] = @options[:destination][:title]
+      route_response['mode'] = @options[:mode]
+
+      route_response
+    end
+
+    def ditanse_to_text(route_response)
       total_kilometers = 0
-      route['legs'].each do |leg|
+      route_response['legs'].each do |leg|
         distance = (leg['distance']['value'].to_f / 1000).round(1)
         leg['distance']['text'] = "#{distance} km"
         total_kilometers += distance
@@ -49,8 +62,8 @@ module Routers
       "#{total_kilometers.round(1)} km"
     end
 
-    def duration_to_text(route)
-      time_details = extract_time_details(route)
+    def duration_to_text(route_response)
+      time_details = extract_time_details(route_response)
 
       info = ''
       info += "#{time_details[:days]} days " if time_details[:days] > 0
@@ -60,8 +73,10 @@ module Routers
       info
     end
 
-    def extract_time_details(route)
-      seconds = route['legs'].sum { |leg| leg['duration']['value'].to_f }
+    def extract_time_details(route_response)
+      seconds = route_response['legs'].sum do |leg|
+        leg['duration']['value'].to_f
+      end
       minutes = (seconds / 60).round
       hours = minutes / 60
       days = hours / 24

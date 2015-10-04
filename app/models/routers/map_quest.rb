@@ -38,9 +38,7 @@ module Routers
 
     def build_json_query
       query = {
-        locations: [@options[:origin][:location],
-                    *(@options[:waypoints].map { |waypoint| waypoint[:location] }),
-                    @options[:destination][:location]],
+        locations: build_locations,
         options: {
           unit: 'k',
           fullShape: true,
@@ -65,6 +63,12 @@ module Routers
       query
     end
 
+    def build_locations
+      [@options[:origin][:location],
+       *(@options[:waypoints].map { |waypoint| waypoint[:location] }),
+       @options[:destination][:location]]
+    end
+
     def extract_routes(response)
       routes = [format_route(response['route'])]
 
@@ -77,16 +81,30 @@ module Routers
       routes
     end
 
-    def format_route(response_route)
-      response_route['provider'] = 'MapQuest'
-      response_route['distance_to_text'] = "#{response_route['distance'].round(1)} km"
-      response_route['duration_to_text'] = duration_to_text(response_route['formattedTime'])
-      response_route['path'] = extract_path(response_route)
-      response_route['legs'].map.with_index do |leg, index|
-        format_leg(leg, response_route['locations'], index)
-      end
+    def format_route(route_response)
+      route_response = assing_metadata(route_response)
+      route_response['distance_to_text'] = "#{route_response['distance'].round(1)} km"
+      route_response['duration_to_text'] = duration_to_text(route_response['formattedTime'])
+      route_response['path'] = extract_path(route_response)
+      route_response['legs'] = format_legs(route_response)
+      route_response['id'] = Route.find_or_create(route_response)
 
-      response_route
+      route_response
+    end
+
+    def assing_metadata(route_response)
+      route_response['provider'] = 'MapQuest'
+      route_response['origin'] = @options[:origin][:title]
+      route_response['destination'] = @options[:destination][:title]
+      route_response['mode'] = @options[:mode]
+
+      route_response
+    end
+
+    def format_legs(route_response)
+      route_response['legs'].map.with_index do |leg, index|
+        format_leg(leg, route_response['locations'], index)
+      end
     end
 
     def format_leg(leg, locations, index)
@@ -99,11 +117,17 @@ module Routers
     end
 
     def format_leg_distance(leg)
-      { text: "#{leg['distance'].round(1)} km", value: leg['distance'] }
+      {
+        'text' => "#{leg['distance'].round(1)} km",
+        'value' => leg['distance'] * 1000
+      }
     end
 
     def format_leg_duration(leg)
-      { text: "#{duration_to_text(leg['formattedTime'])}", value: leg['time'] }
+      {
+        'text' => "#{duration_to_text(leg['formattedTime'])}",
+        'value' => leg['time']
+      }
     end
 
     def duration_to_text(formatted_time)
@@ -123,10 +147,10 @@ module Routers
       [location['street'], location['adminArea5'], location['adminArea1']].compact.join(', ')
     end
 
-    def extract_path(response_route)
+    def extract_path(route_response)
       path = []
 
-      response_route['shape']['shapePoints'].each_slice(2) do |pair|
+      route_response['shape']['shapePoints'].each_slice(2) do |pair|
         path << { lat: pair[0], lng: pair[1] }
       end
 
