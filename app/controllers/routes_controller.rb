@@ -13,7 +13,15 @@ class RoutesController < ApplicationController
   end
 
   def evaluate
-    byebug
+    if current_user
+      evaluation = current_user.find_evaluation(params[:route_id])
+      evaluation.positive = params[:positive]
+      evaluation.save
+
+      render json: { evaluations: evaluation.route.format_evaluations }
+    else
+      render json: { error_message: 'Please, log into your account to evaluate the route.' }
+    end
   end
 
   private

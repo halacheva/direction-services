@@ -128,12 +128,16 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
           };
 
           $scope.evaluateRoute = function(index, positive) {
-            var url = '/evaluate?';
-            url += 'positive=' + positive;
-            url += '&route=' + JSON.stringify($scope.routes[index]);
-
+            var route_id = $scope.routes[index].id;
+            var url = '/evaluate?route_id=' + route_id + '&positive=' + positive;
             $http.get(url).then(function(response) {
-              debugger;
+              if (typeof response.data.evaluations !== 'undefined') {
+                $scope.routes[index].evaluations = response.data.evaluations;
+              } else {
+                $scope.errorMessage = response.data.error_message;
+                // wait for removing the list with routes
+                $timeout(function() { $scope.errorMessage = undefined; }, 3000);
+              }
             });
           };
         }
