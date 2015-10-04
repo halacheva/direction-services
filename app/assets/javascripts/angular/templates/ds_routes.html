@@ -68,10 +68,16 @@
   <li ng-repeat="route in routes track by $index"
       ng-class="{ active: displayedRoute == $index }"
       ng-click="displayRoute($index)">
-    <span class="summary">
-      {{ route.provider }}:
-      {{ route.summary || route.name || ('Route ' + ($index + 1)) }}
-      ({{ route.distance_to_text }}, {{ route.duration_to_text }})
+    <span class="title">
+      <span class="summary">
+        {{ route.provider }}:
+        {{ route.summary || route.name || ('Route ' + ($index + 1)) }}
+        ({{ route.distance_to_text }}, {{ route.duration_to_text }})
+      </span>
+      <span class="evaluate">
+        <span ng-click="evaluate(true)"class="like glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+        <span ng-click="evaluate(false)"class="dislike glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
+      </span>
     </span>
     <div class="route-details" ng-show="displayedRoute == $index">
       <div id="sub_routes_list">

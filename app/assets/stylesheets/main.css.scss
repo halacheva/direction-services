@@ -102,12 +102,31 @@
 
   li {
     border-bottom: 1px solid #fff;
-    span.summary {
+    span.title {
       padding: 10px;
       display: block;
       background-color: #5BC0DE;
       color: #fff;
       cursor: pointer;
+      overflow: hidden;
+
+      span.summary {
+        width: 448px;
+        float: left;
+      }
+
+      span.evaluate {
+        width: 32px;
+        float: right;
+
+        .like:hover, .like.active {
+          color: #02FF02;
+        }
+        .dislike:hover, .dislike.active {
+          color: #FF001F;
+        }
+
+      }
     }
 
     .route-details {

@@ -64,7 +64,6 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
             };
             $scope.clearRoutes();
             Router.clear({ keepMarkers: true });
-            $scope.locations = [$scope.originInput.val(), ]
             $scope.routingInProgress = true;
             Router.route($scope.options).then(function(routes) {
               $scope.routes = routes;
