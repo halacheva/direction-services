@@ -30,14 +30,18 @@ angular.module('directionServicesApp').directive('dsRoutes', ['Router',
               var locationString = waypoint.position.lat() + ',' + waypoint.position.lng();
               $scope.options.waypoints.push({ location: locationString, title: waypoint.title });
               $scope.waypointsInput.val('');
-              $scope.clearRoutes()
+              $scope.clearRoutes();
             }
           };
 
           $scope.removeWaypoint = function(index) {
             $scope.options.waypoints.splice(index, 1);
             Router.removeWaypoint(index);
-            $scope.clearRoutes()
+            $scope.clearRoutes();
+
+            if ($scope.options.waypoints.length == 0) {
+              $scope.options.optimize = false;
+            }
           };
 
           $scope.reachedWaypointsLimit = function() {
