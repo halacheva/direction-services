@@ -77,7 +77,7 @@ module Routers
         'mode' => @options[:mode],
         'legs' => legs,
         'path' => path,
-        'distance_to_text' => "#{totals[:distance].round(1)} km",
+        'distance_to_text' => "#{(totals[:distance] / 1000).round(1)} km",
         'duration_to_text' => duration_to_text(totals[:duration])
       }
 
